@@ -1,0 +1,620 @@
+<html><head</head><body>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTTW 系統異常回報查詢</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #34495e;
+            --card-background: #ffffff;
+            --accent-color: #e74c3c;
+            --header-bg: #2c3e50;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background-color: var(--header-bg);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--box-shadow);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .header h1 i {
+            margin-right: 10px;
+            font-size: 2.2rem;
+        }
+
+        .header h1:hover {
+            transform: scale(1.05);
+        }
+
+        .menu {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .menu-item {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .menu-item i {
+            margin-right: 8px;
+        }
+
+        .menu-item:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--secondary-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-item:hover:before {
+            transform: scaleX(1);
+        }
+
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-item.active {
+            background-color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 3rem auto;
+            padding: 2.5rem;
+            background-color: var(--card-background);
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 i {
+            margin-right: 15px;
+            font-size: 2.8rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        label i {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem 1rem 1rem 2.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-repeat: no-repeat;
+            background-position: 10px center;
+            background-size: 20px;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        #reportCode {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%233498db" d="M336 256c0-20.9-13.4-38.7-32-45.3V160c0-17.7-14.3-32-32-32H96c-17.7 0-32 14.3-32 32v192c0 17.7 14.3 32 32 32h176c17.7 0 32-14.3 32-32v-50.7c18.6-6.6 32-24.4 32-45.3zm-144-64h64v32h-64v-32zm0 160v-64h64v64h-64zm128-64c0 13.3-10.7 24-24 24s-24-10.7-24-24 10.7-24 24-24 24 10.7 24 24z"/></svg>');
+        }
+
+        #captchaInput {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%233498db" d="M480 256c0 123.4-100.5 223.9-223.9 223.9-48.86 0-95.19-15.58-134.2-44.86-14.14-10.59-17-30.66-6.391-44.81 10.61-14.09 30.69-16.97 44.8-6.375 27.84 20.91 61 31.94 95.89 31.94C344.3 415.8 416 344.1 416 256S344.3 96.2 256.1 96.2C167.8 96.2 96.21 167.8 96.21 256c0 10.24 .9824 20.66 2.936 30.82 1.788 9.513-3.695 18.83-13.01 22.14L68.51 312.5c-11.33 4.047-23.76-1.906-27.77-13.25C36.09 083.1 32.05 269.4 32.05 256C32.05 132.6 132.6 32.05 256 32.05S480 132.6 480 256z"/></svg>');
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button i {
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        #result {
+            margin-top: 2rem;
+            background-color: var(--card-background);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
+        }
+
+        #result h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        #result h2 i {
+            margin-right: 10px;
+        }
+
+        #result p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        #result p i {
+            margin-right: 10px;
+            color: var(--primary-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        #result strong {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: var(--accent-color);
+            background-color: #fdeaea;
+            padding: 1.2rem;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .error-message i {
+            margin-right: 10px;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 1.5rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            background-color: var(--header-bg);
+            color: #ffffff;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+            font-size: 1rem;
+        }
+
+        .captcha-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #captchaImage {
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        #captchaImage:hover {
+            transform: scale(1.05);
+        }
+
+        #refreshCaptcha {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #refreshCaptcha:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .menu {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .menu.active {
+                display: flex;
+            }
+
+            .menu-item {
+                padding: 0.8rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                right: 2rem;
+                top: 1rem;
+            }
+
+            .container {
+                width: 95%;
+                padding: 2rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .captcha-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideInFromLeft {
+            from { transform: translateX(-50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInFromRight {
+            from { transform: translateX(50px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .slide-in-left {
+            animation: slideInFromLeft 0.5s ease-out;
+        }
+
+        .slide-in-right {
+            animation: slideInFromRight 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="fade-in"><i class="fas fa-database"></i> CTTW</h1>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="menu" id="menu">
+                <a href="https://ctttw.github.io/report_form.html" class="menu-item slide-in-left" style="animation-delay: 0.2s;"><i class="fas fa-plus-circle"></i> 新增回報</a>
+                <a href="https://sites.google.com/view/ctttw/%E9%A6%96%E9%A0%81" class="menu-item slide-in-left" style="animation-delay: 0.3s;"><i class="fas fa-info-circle"></i> 更多資訊</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container" data-aos="fade-up">
+        <h1><i class="fas fa-search"></i> CTTW 系統異常回報查詢</h1>
+        
+        <form id="queryForm">
+            <label for="reportCode"><i class="fas fa-key"></i> 回報代碼：</label>
+            <input type="text" id="reportCode" name="reportCode" required placeholder="請輸入您的回報代碼" data-aos="fade-right">
+            
+            <label for="captchaInput"><i class="fas fa-shield-alt"></i> 驗證碼：</label>
+            <input type="text" id="captchaInput" name="captchaInput" required placeholder="請輸入驗證碼" data-aos="fade-right">
+            <div class="captcha-container" data-aos="fade-up">
+                <img id="captchaImage" src="" alt="驗證碼" width="150" height="50">
+                <button type="button" id="refreshCaptcha"><i class="fas fa-sync-alt"></i> 刷新驗證碼</button>
+            </div>
+            <button type="submit" data-aos="fade-up"><i class="fas fa-search"></i> 查詢紀錄</button>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <footer data-aos="fade-up">
+        <i class="far fa-copyright"></i> 2024 CTTW異常回報紀錄查詢 All rights reserved.
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-lkImO8hcUlET33t2S_EdykNXF_E_md1GdLbtq-YLF4Qbl8t814i6K7tmePT8Zqw/exec';
+        let captchaText = '';
+
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            captchaText = '';
+            for (let i = 0; i < 6; i++) {
+                captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return captchaText;
+        }
+
+        function drawCaptcha() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 150;
+            canvas.height = 50;
+
+            // 背景
+            ctx.fillStyle = '#f0f3f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 文字
+            ctx.font = 'bold 30px Noto Sans TC';
+            ctx.fillStyle = '#34495e';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            
+            for (let i = 0; i < captchaText.length; i++) {
+                const x = (i + 1) * (canvas.width / (captchaText.length + 1));
+                const y = canvas.height / 2 + Math.random() * 10 - 5;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate((Math.random() - 0.5) * 0.4);
+                ctx.fillText(captchaText[i], 0, 0);
+                ctx.restore();
+            }
+
+            // 干擾線
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.strokeStyle = `rgba(52, 152, 219, 0.5)`;
+                ctx.stroke();
+            }
+
+            // 設置圖片源
+            document.getElementById('captchaImage').src = canvas.toDataURL();
+        }
+
+        function refreshCaptcha() {
+            generateCaptcha();
+            drawCaptcha();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true
+            });
+
+            refreshCaptcha();
+            document.getElementById('refreshCaptcha').addEventListener('click', refreshCaptcha);
+
+            // 菜單切換功能
+            const menuToggle = document.getElementById('menuToggle');
+            const menu = document.getElementById('menu');
+
+            menuToggle.addEventListener('click', function() {
+                menu.classList.toggle('active');
+            });
+        });
+
+        document.getElementById('queryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const reportCode = document.getElementById('reportCode').value;
+            const captchaInput = document.getElementById('captchaInput').value;
+            
+            if (captchaInput.toLowerCase() !== captchaText.toLowerCase()) {
+                alert('驗證碼錯誤，請重新輸入');
+                refreshCaptcha();
+                document.getElementById('captchaInput').value = '';
+                return;
+            }
+            
+            queryReport(reportCode);
+        });
+
+        function queryReport(reportCode) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.opacity = '0';
+            resultDiv.innerHTML = '<div class="loader"></div>';
+            resultDiv.style.opacity = '1';
+
+            fetch(`${SCRIPT_URL}?reportCode=${reportCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    resultDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        if (data.found) {
+                            resultDiv.innerHTML = `
+                                <h2 class="slide-in-left"><i class="fas fa-clipboard-list"></i> 回報紀錄詳情</h2>
+                                <p class="slide-in-right"><i class="far fa-clock"></i> <strong>時間戳記：</strong> ${data.timestamp}</p>
+                                <p class="slide-in-left"><i class="far fa-envelope"></i> <strong>回報者電子郵件：</strong> ${data.email}</p>
+                                <p class="slide-in-right"><i class="fas fa-tag"></i> <strong>問題類別：</strong> ${data.category}</p>
+                                <p class="slide-in-left"><i class="fas fa-comment-alt"></i> <strong>問題描述：</strong> ${data.description}</p>
+                                <p class="slide-in-right"><i class="fas fa-key"></i> <strong>回報代碼：</strong> ${data.reportCode}</p>
+                            `;
+                        } else {
+                            resultDiv.innerHTML = '<p class="error-message fade-in"><i class="fas fa-exclamation-triangle"></i> 找不到相關回報紀錄。請確認回報代碼是否正確。</p>';
+                        }
+                        resultDiv.style.opacity = '1';
+                        refreshCaptcha();
+                        document.getElementById('captchaInput').value = '';
+                    }, 300);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resultDiv.style.opacity = '0';
+                    setTimeout(() => {
+                        resultDiv.innerHTML = '<p class="error-message fade-in"><i class="fas fa-exclamation-circle"></i> 查詢時發生錯誤。請稍後再試。</p>';
+                        resultDiv.style.opacity = '1';
+                        refreshCaptcha();
+                        document.getElementById('captchaInput').value = '';
+                    }, 300);
+                });
+        }
+
+        // 防止複製
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // 防止截圖 (僅適用於部分瀏覽器)
+        document.addEventListener('keyup', function(e) {
+            if (e.key == 'PrintScreen') {
+                navigator.clipboard.writeText('');
+                alert('截圖功能已被禁用');
+            }
+        });
+
+        // 防止右鍵點擊
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 防止拖曳選擇文字
+        document.onselectstart = function() {
+            return false;
+        };
+    </script>
+</body>
+</html>
+</body></html>

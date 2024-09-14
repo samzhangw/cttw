@@ -1,0 +1,862 @@
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTTW系統異常回報</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #6c5ce7;
+  --secondary-color: #00b894;
+  --background-color: #f0f2f5;
+  --text-color: #2d3436;
+  --card-background: #ffffff;
+  --input-background: #e4e6e9;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --error-color: #d63031;
+  --success-color: #00b894;
+  --gradient-start: #6c5ce7;
+  --gradient-end: #00b894;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: fixed;
+  width: 100%;
+  z-index: 1001;
+  background-color: var(--card-background);
+  padding: 1rem 0;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.logo {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.logo i {
+  margin-right: 0.5rem;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: auto;
+  width: 40px;
+  height: 40px;
+  padding: 0.5rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.menu-toggle:hover {
+  transform: rotate(90deg);
+  color: var(--secondary-color);
+}
+
+.menu-toggle.active {
+  color: var(--secondary-color);
+}
+
+.full-page-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.full-page-menu.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.menu-content {
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  padding: 2rem;
+}
+
+.nav-menu {
+  list-style-type: none;
+  padding: 0;
+}
+
+.nav-item {
+  margin: 2rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.full-page-menu.show .nav-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.full-page-menu.show .nav-item:nth-child(1) { transition-delay: 0.1s; }
+.full-page-menu.show .nav-item:nth-child(2) { transition-delay: 0.2s; }
+.full-page-menu.show .nav-item:nth-child(3) { transition-delay: 0.3s; }
+
+.nav-link {
+  font-size: 1.5rem;
+  padding: 1rem 2rem;
+  color: var(--text-color);
+  text-decoration: none;
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-block;
+}
+
+.nav-link:hover {
+  color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.nav-link i {
+  margin-right: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.nav-link:hover i {
+  transform: rotate(15deg);
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 5rem;
+}
+
+.container {
+  background-color: var(--card-background);
+  border-radius: 20px;
+  box-shadow: var(--box-shadow);
+  padding: 3rem;
+  transition: all 0.4s ease;
+  max-width: 800px;
+  width: 100%;
+}
+
+h2 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h2 i {
+  margin-right: 0.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+input[type="email"],
+input[type="text"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--input-background);
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background-color: var(--input-background);
+}
+
+input[type="email"]:focus,
+input[type="text"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+button {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+button i {
+  margin-right: 0.5rem;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:disabled {
+  background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+  cursor: not-allowed;
+}
+
+.success-message, .error-message {
+  padding: 1rem;
+  border-radius: 10px;
+  margin-top: 1.5rem;
+  text-align: center;
+  display: none;
+  font-weight: 500;
+}
+
+.success-message {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: var(--success-color);
+}
+
+.error-message {
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: var(--error-color);
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-color);
+  padding: 1rem 0;
+  background-color: var(--card-background);
+}
+
+.error {
+  color: var(--error-color);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  display: none;
+}
+
+.captcha-container {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.captcha-image {
+  background-color: var(--input-background);
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  letter-spacing: 5px;
+  user-select: none;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.refresh-captcha {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+  font-size: 1rem;
+  width: auto;
+}
+
+.refresh-captcha:hover {
+  background-color: #00a382;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1002;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  background-color: var(--card-background);
+  margin: 15% auto;
+  padding: 2rem;
+  border: none;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.modal-content h3 {
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.modal-content p {
+  color: var(--text-color);
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.modal-buttons button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#confirmSubmit {
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: white;
+}
+
+#cancelSubmit {
+  background-color: var(--input-background);
+  color: var(--text-color);
+}
+
+.modal-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    padding: 2rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<header class="header">
+  <div class="header-content">
+    <a href="https://ctttw.github.io/report_form" class="logo">
+      <i class="fas fa-chart-line"></i>
+      CTTW
+    </a>
+    <button id="menuToggle" class="menu-toggle">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+<nav class="full-page-menu" id="fullPageMenu">
+  <div class="menu-content">
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="https://ctttw.github.io/" class="nav-link">
+          <i class="fas fa-home"></i>
+          落點分析系統
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="https://ctttw.github.io/search" class="nav-link">
+          <i class="fas fa-search"></i>
+          異常回報查詢
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="https://sites.google.com/view/ctttw/%E9%A6%96%E9%A0%81" class="nav-link">
+          <i class="fas fa-info-circle"></i>
+          更多會考資訊
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<main class="main-content">
+<div class="container fade-in">
+  <h2>
+    <i class="fas fa-exclamation-triangle"></i>
+    CTTW系統異常回報
+  </h2>
+  <form id="reportForm">
+    <div class="form-group">
+      <label for="email">
+        <i class="fas fa-envelope"></i>
+        電子郵件
+      </label>
+      <input type="email" id="email" name="email" required placeholder="請輸入您的電子郵件">
+      <div class="error" id="emailError"></div>
+    </div>
+    <div class="form-group">
+      <label for="category">
+        <i class="fas fa-list-ul"></i>
+        異常類別
+      </label>
+      <select id="category" name="category" required>
+        <option value="">請選擇異常類別</option>
+        <option value="邀請碼功能有誤">邀請碼功能有誤</option>
+        <option value="分析結果錯誤">分析結果錯誤</option>
+        <option value="學校分數錯誤">學校分數錯誤</option>
+        <option value="學校科系錯誤">學校科系錯誤</option>
+        <option value="程式錯誤">程式錯誤</option>
+        <option value="功能異常">功能異常</option>
+        <option value="效能問題">效能問題</option>
+        <option value="其他">其他</option>
+      </select>
+      <div class="error" id="categoryError"></div>
+    </div>
+    <div class="form-group">
+      <label for="description">
+        <i class="fas fa-comment-alt"></i>
+        問題描述
+      </label>
+      <textarea id="description" name="description" required placeholder="請詳細描述您遇到的問題..." maxlength="1000"></textarea>
+      <div id="charCount">1000 / 1000</div>
+      <div class="error" id="descriptionError"></div>
+    </div>
+    <div class="form-group">
+      <label for="captchaInput">
+        <i class="fas fa-shield-alt"></i>
+        驗證碼
+      </label>
+      <input type="text" id="captchaInput" name="captcha" required placeholder="請輸入驗證碼">
+      <div class="captcha-container">
+        <div id="captchaImage" class="captcha-image"></div>
+        <button type="button" id="refreshCaptcha" class="refresh-captcha">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+      </div>
+      <div class="error" id="captchaError"></div>
+    </div>
+    <button type="submit" id="submitBtn" disabled>
+      <i class="fas fa-paper-plane"></i>
+      提交回報
+    </button>
+  </form>
+  <div id="successMessage" class="success-message">
+    <i class="fas fa-check-circle"></i>
+    回報已成功提交，感謝您的反饋！<br>
+    您的回報代碼是：<span id="reportCode"></span><br>
+    請保存此代碼以便日後查詢回報進度。
+  </div>
+  <div id="errorMessage" class="error-message">
+    <i class="fas fa-times-circle"></i>
+    提交失敗，請稍後再試。
+  </div>
+</div>
+</main>
+
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <h3>確認提交</h3>
+    <p>您確定要提交此回報嗎？提交後將無法修改。</p>
+    <div class="modal-buttons">
+      <button id="confirmSubmit">確認</button>
+      <button id="cancelSubmit">取消</button>
+    </div>
+  </div>
+</div>
+
+<footer class="copyright">
+© 2024 CTTW會考落點分析系統異常回報平台。保留所有權利。
+</footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let captchaText = '';
+  let captchaAttempts = 0;
+  const MAX_CAPTCHA_ATTEMPTS = 3;
+
+  function generateCaptcha() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    captchaText = '';
+    for (let i = 0; i < 6; i++) {
+      captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('captchaImage').textContent = captchaText;
+  }
+
+  function generateReportCode() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 8; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
+  function validateEmail(email) {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }
+
+  function showError(inputElement, errorMessage) {
+    const errorElement = document.getElementById(inputElement.id + 'Error');
+    if (errorElement) {
+      errorElement.textContent = errorMessage;
+      errorElement.style.display = 'block';
+      inputElement.classList.add('invalid');
+    }
+  }
+
+  function hideError(inputElement) {
+    const errorElement = document.getElementById(inputElement.id + 'Error');
+    if (errorElement) {
+      errorElement.style.display = 'none';
+      inputElement.classList.remove('invalid');
+    }
+  }
+
+  function updateCharCount() {
+    const description = document.getElementById('description');
+    const charCount = document.getElementById('charCount');
+    const remainingChars = 1000 - description.value.length;
+    charCount.textContent = `${remainingChars} / 1000`;
+    if (remainingChars < 0) {
+      charCount.style.color = 'red';
+    } else {
+      charCount.style.color = '#666';
+    }
+  }
+
+  function validateForm() {
+    const email = document.getElementById('email');
+    const category = document.getElementById('category');
+    const description = document.getElementById('description');
+    const captchaInput = document.getElementById('captchaInput');
+
+    let isValid = true;
+
+    if (!validateEmail(email.value)) {
+      showError(email, '請輸入有效的電子郵件地址');
+      isValid = false;
+    } else {
+      hideError(email);
+    }
+
+    if (category.value === '') {
+      showError(category, '請選擇異常類別');
+      isValid = false;
+    } else {
+      hideError(category);
+    }
+
+    if (description.value.trim().length < 10 || description.value.length > 1000) {
+      showError(description, '問題描述需要10到1000個字符');
+      isValid = false;
+    } else {
+      hideError(description);
+    }
+
+    if (captchaInput.value.toLowerCase() !== captchaText.toLowerCase()) {
+      captchaAttempts++;
+      if (captchaAttempts >= MAX_CAPTCHA_ATTEMPTS) {
+        showError(captchaInput, '驗證碼錯誤次數過多，請稍後再試');
+        document.getElementById('submitBtn').disabled = true;
+      } else {
+        showError(captchaInput, `驗證碼不正確，還有 ${MAX_CAPTCHA_ATTEMPTS - captchaAttempts} 次機會`);
+      }
+      isValid = false;
+      generateCaptcha();
+    } else {
+      hideError(captchaInput);
+    }
+
+    return isValid;
+  }
+
+  function checkFormCompletion() {
+    const email = document.getElementById('email').value;
+    const category = document.getElementById('category').value;
+    const description = document.getElementById('description').value;
+    const captcha = document.getElementById('captchaInput').value;
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (email && category && description && captcha) {
+      submitBtn.disabled = false;
+    } else {
+      submitBtn.disabled = true;
+    }
+  }
+
+  generateCaptcha();
+
+  const menuToggle = document.getElementById('menuToggle');
+  const fullPageMenu = document.getElementById('fullPageMenu');
+
+  menuToggle.addEventListener('click', function() {
+    fullPageMenu.classList.toggle('show');
+    this.classList.toggle('active');
+  });
+
+  fullPageMenu.addEventListener('click', function(e) {
+    if (e.target === fullPageMenu) {
+      fullPageMenu.classList.remove('show');
+      menuToggle.classList.remove('active');
+    }
+  });
+
+  document.getElementById('refreshCaptcha').addEventListener('click', generateCaptcha);
+
+  const form = document.getElementById('reportForm');
+  const confirmModal = document.getElementById('confirmModal');
+  const confirmSubmit = document.getElementById('confirmSubmit');
+  const cancelSubmit = document.getElementById('cancelSubmit');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (validateForm()) {
+      confirmModal.style.display = 'block';
+      setTimeout(() => {
+        confirmModal.classList.add('show');
+      }, 10);
+    }
+  });
+
+  confirmSubmit.addEventListener('click', function() {
+    confirmModal.classList.remove('show');
+    setTimeout(() => {
+      confirmModal.style.display = 'none';
+    }, 300);
+    submitForm();
+  });
+
+  cancelSubmit.addEventListener('click', function() {
+    confirmModal.classList.remove('show');
+    setTimeout(() => {
+      confirmModal.style.display = 'none';
+    }, 300);
+  });
+
+  confirmModal.addEventListener('click', function(e) {
+    if (e.target === confirmModal) {
+      confirmModal.classList.remove('show');
+      setTimeout(() => {
+        confirmModal.style.display = 'none';
+      }, 300);
+    }
+  });
+
+  function submitForm() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loading"></span>提交中...';
+
+    var reportCode = generateReportCode();
+
+    var data = {
+      email: document.getElementById('email').value,
+      category: document.getElementById('category').value,
+      description: document.getElementById('description').value,
+      reportCode: reportCode
+    };
+
+    fetch('https://script.google.com/macros/s/AKfycby-lkImO8hcUlET33t2S_EdykNXF_E_md1GdLbtq-YLF4Qbl8t814i6K7tmePT8Zqw/exec', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if(data.result === 'success') {
+        document.getElementById('reportCode').textContent = reportCode;
+        document.getElementById('successMessage').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
+        form.reset();
+        generateCaptcha();
+        captchaAttempts = 0;
+      } else {
+        throw new Error('Submission failed');
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      document.getElementById('errorMessage').style.display = 'block';
+      document.getElementById('successMessage').style.display = 'none';
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 提交回報';
+      checkFormCompletion();
+    });
+  }
+
+  const inputs = document.querySelectorAll('input, select, textarea');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.parentElement.querySelector('label').style.color = 'var(--primary-color)';
+    });
+    input.addEventListener('blur', function() {
+      this.parentElement.querySelector('label').style.color = 'var(--text-color)';
+    });
+    input.addEventListener('input', function() {
+      hideError(this);
+      checkFormCompletion();
+    });
+  });
+
+  document.getElementById('description').addEventListener('input', function() {
+    updateCharCount();
+  });
+
+  // Prevent copying
+  document.addEventListener('copy', function(e) {
+    e.preventDefault();
+    return false;
+  });
+
+  // Prevent screenshot (only works in some browsers)
+  document.addEventListener('keyup', function(e) {
+    if (e.key == 'PrintScreen') {
+      navigator.clipboard.writeText('');
+      alert('截圖功能已被禁用');
+    }
+  });
+
+  // Prevent right-click
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+  });
+
+  // Prevent text selection
+  document.onselectstart = function() {
+    return false;
+  };
+
+  updateCharCount();
+  checkFormCompletion();
+});
+</script>
+</body>
+</html>
