@@ -1,99 +1,750 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>中投區會考落點分析邀請碼</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Space+Mono:wght@700&family=Noto+Sans+TC:wght@400;700&display=swap">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="main.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --background-color: #f8f9fa;
+      --text-color: #2b2d42;
+      --card-background: #ffffff;
+      --shadow-color: rgba(0, 0, 0, 0.08);
+      --accent-color: #ff006e;
+      --success-color: #38b000;
+      --border-radius: 20px;
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text-color);
+      line-height: 1.6;
+      background: linear-gradient(135deg, #8ecae6 0%, #219ebc 100%);
+      background-attachment: fixed;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+      z-index: -1;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 3rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      transition: var(--transition);
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      animation: slideUp 0.8s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .container::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent-color), var(--primary-color), var(--secondary-color));
+      z-index: 10;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1, h2 {
+      color: var(--primary-color);
+      position: relative;
+      display: inline-block;
+      margin-bottom: 2rem;
+      font-weight: 700;
+    }
+
+    h1 { 
+      font-size: 2.2rem; 
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(67, 97, 238, 0.3);
+    }
+    
+    h2 { 
+      font-size: 1.8rem; 
+      font-weight: 500; 
+    }
+
+    .invitation-code-container {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      margin: 2.5rem 0;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12), 0 5px 10px rgba(0, 0, 0, 0.08);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      position: relative;
+      background: #f1f1f1;
+    }
+
+    .invitation-code {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      padding: 1.2rem 1.5rem;
+      background-color: rgba(67, 97, 238, 0.1);
+      display: inline-block;
+      border: none;
+      border-radius: var(--border-radius) 0 0 var(--border-radius);
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 2px;
+    }
+
+    .invitation-code::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+      transform: rotate(45deg);
+      transition: all 0.3s;
+      opacity: 0;
+    }
+
+    .invitation-code:hover::after {
+      animation: shimmer 1.5s ease-in-out infinite;
+      opacity: 1;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; opacity: 0; }
+      50% { opacity: 0.7; }
+      100% { left: 100%; opacity: 0; }
+    }
+
+    .copy-button {
+      background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      font-size: 1.3rem;
+      border-radius: 0 var(--border-radius) var(--border-radius) 0;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .copy-button:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    .copy-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+      transition: all 0.6s;
+    }
+    
+    .copy-button:hover::before {
+      left: 100%;
+    }
+    
+    .timer {
+      font-size: 1.3rem;
+      margin-bottom: 2.5rem;
+      color: var(--accent-color);
+      background-color: rgba(255, 0, 110, 0.1);
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      display: inline-block;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(255, 0, 110, 0.1);
+      font-weight: 500;
+    }
+
+    .timer i {
+      margin-right: 8px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .progress-container {
+      width: 100%;
+      background: rgba(236, 239, 244, 0.5);
+      border-radius: 50px;
+      overflow: hidden;
+      margin: 1.5rem 0;
+      height: 8px;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-color) 0%, var(--primary-color) 50%, var(--secondary-color) 100%);
+      transition: width 1s linear;
+      border-radius: 50px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        90deg,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0.4) 50%,
+        rgba(255,255,255,0) 100%
+      );
+      animation: progressShimmer 2s infinite;
+    }
+
+    @keyframes progressShimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 1.5rem 0;
+    }
+
+    .button {
+      background: #fff;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 500;
+    }
+
+    .button:hover {
+      background: var(--primary-color);
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .button i {
+      font-size: 1.1rem;
+    }
+
+    .info {
+      margin-top: 2.5rem;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 2rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+      transition: var(--transition);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .info:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+    }
+
+    .info p {
+      margin-bottom: 1.2rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .info p:last-child {
+      margin-bottom: 0;
+    }
+
+    .icon {
+      position: absolute;
+      left: 0;
+      top: 3px;
+      font-size: 1.2em;
+      color: var(--primary-color);
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--success-color) 0%, #56CCF2 100%);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      opacity: 0;
+      transition: var(--transition);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+      z-index: 9999;
+    }
+
+    .marquee {
+      width: 100%;
+      overflow: hidden;
+      background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+      color: white;
+      padding: 12px 0;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .marquee-content {
+      display: inline-block;
+      white-space: nowrap;
+      animation: marquee 30s linear infinite;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
+
+    .floating-buttons {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      z-index: 1000;
+    }
+
+    .floating-button {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: white;
+      background: white;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+    }
+
+    .floating-button:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.1);
+      background: var(--primary-color);
+      color: white;
+    }
+
+    #helpButton {
+      background: white;
+      color: var(--accent-color);
+      border: 2px solid var(--accent-color);
+    }
+    
+    #helpButton:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      background-color: var(--card-background);
+      margin: 10% auto;
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: 0 15px 30px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+      max-width: 500px;
+      width: 85%;
+      animation: modalSlideUp 0.4s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+    }
+
+    .modal-content::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--accent-color), var(--primary-color), var(--secondary-color));
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(50px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      transition: var(--transition);
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .close:hover {
+      color: var(--text-color);
+      background-color: rgba(0,0,0,0.05);
+      cursor: pointer;
+    }
+
+    #qrCode {
+      background-color: white;
+      padding: 20px;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+      display: inline-block;
+      margin-top: 1rem;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f1f1f1;
+    }
+    
+    #qrCode:hover { 
+      transform: scale(1.05);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Dark mode styles */
+    body.dark-mode {
+      --primary-color: #4cc9f0;
+      --secondary-color: #4361ee;
+      --background-color: #121212;
+      --text-color: #e0e0e0;
+      --card-background: #1e1e1e;
+      --shadow-color: rgba(0,0,0,0.3);
+      --accent-color: #f72585;
+      --success-color: #4cc9f0;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+
+    body.dark-mode .container,
+    body.dark-mode .info,
+    body.dark-mode .modal-content {
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    body.dark-mode .invitation-code {
+      background-color: rgba(76, 201, 240, 0.1);
+    }
+
+    body.dark-mode .button {
+      background: #1e1e1e;
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    body.dark-mode .floating-button {
+      background: #1e1e1e;
+      border-color: var(--primary-color);
+    }
+
+    body.dark-mode #helpButton {
+      border-color: var(--accent-color);
+    }
+
+    /* Spinner and animations */
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .spinner:before,
+    .spinner:after {
+      content: '';
+      display: block;
+      position: absolute;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: var(--primary-color);
+      animation: spin 1.2s cubic-bezier(0.42, 0.61, 0.58, 0.41) infinite;
+    }
+
+    .spinner:before {
+      width: 100%;
+      height: 100%;
+      border-width: 3px;
+      top: 0;
+      left: 0;
+      border-right-color: var(--secondary-color);
+    }
+
+    .spinner:after {
+      width: 70%;
+      height: 70%;
+      border-width: 3px;
+      top: 15%;
+      left: 15%;
+      border-left-color: var(--accent-color);
+      animation-duration: 0.85s;
+      animation-direction: reverse;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Custom icon */
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      margin-right: 10px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .copyright {
+      margin: 2rem 0;
+      font-size: 0.9rem;
+      color: white;
+      opacity: 0.7;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 10px 20px;
+      border-radius: 50px;
+      backdrop-filter: blur(5px);
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .container { padding: 2rem; }
+      h1 { font-size: 1.8rem; }
+      .invitation-code { font-size: 1.6rem; padding: 1rem; }
+      .button-group { flex-direction: column; align-items: stretch; }
+      .button { margin: 0.3rem 0; }
+      .floating-buttons { bottom: 20px; right: 20px; }
+      .floating-button { width: 50px; height: 50px; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 1.5rem; border-radius: var(--border-radius); }
+      h1 { font-size: 1.5rem; }
+      .invitation-code-container { flex-direction: column; }
+      .invitation-code {
+        font-size: 1.3rem;
+        padding: 0.8rem;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        border-right: none;
+        border-bottom: none;
+      }
+      .copy-button { 
+        border-radius: 0 0 var(--border-radius) var(--border-radius);
+      }
+      .modal-content { width: 90%; padding: 1.5rem; }
+    }
+  </style>
 </head>
 <body>
-  <div class="loading">
-    <div class="loading-spinner"></div>
+  <div class="marquee">
+    <div class="marquee-content">
+      歡迎使用中投區會考落點分析系統！如系統有任何問題請使用異常回報系統回報給我們
+    </div>
   </div>
 
-  <div class="particles" id="particles"></div>
-
   <div class="container">
-    <h1><i class="fas fa-key"></i> 中投區邀請碼</h1>
+    <h1>
+      <svg class="logo-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#4361ee" />
+            <stop offset="100%" stop-color="#3a0ca3" />
+          </linearGradient>
+        </defs>
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" fill="url(#logoGradient)"/>
+      </svg>
+      中投區會考落點分析邀請碼
+    </h1>
     
     <div class="invitation-code-container">
       <div class="invitation-code" id="invitationCode"></div>
       <button class="copy-button" onclick="copyInvitationCode()">
-        <i class="fas fa-copy"></i>
-        <span>複製</span>
+        <i class="fas fa-copy"></i> 複製
       </button>
     </div>
-
+    
+    <div id="lastUpdate" class="last-update" style="font-size: 0.9rem; opacity: 0.7; margin-bottom: 10px;"></div>
     <div class="timer" id="timer"></div>
-
-    <div class="button-group">
-      <button class="action-button" onclick="showQRCode()">
-        <i class="fas fa-qrcode"></i>
-        <span>顯示QR碼</span>
-      </button>
-      <button class="action-button" onclick="shareInvitationCode()">
-        <i class="fas fa-share-alt"></i>
-        <span>分享邀請碼</span>
-      </button>
+    
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
     </div>
-
+    
+    <div class="button-group">
+      <button class="button" onclick="showQRCode()"><i class="fas fa-qrcode"></i> 顯示QR碼</button>
+      <button class="button" onclick="shareInvitationCode()"><i class="fas fa-share-alt"></i> 分享</button>
+      <button class="button" onclick="manualRefresh()"><i class="fas fa-sync-alt"></i> 更新</button>
+    </div>
+    
     <div class="info">
-      <p>
-        <i class="fas fa-sync-alt"></i>
-        <span>邀請碼系統每小時自動更新一次，確保系統安全性</span>
-      </p>
-      <p>
-        <i class="fas fa-clock"></i>
-        <span>請在邀請碼有效期內完成落點分析系統的操作與查詢</span>
-      </p>
-      <p>
-        <i class="fas fa-chart-line"></i>
-        <span>立即前往 <a href="https://ctttw.github.io/">會考落點分析平台</a> 進行志願模擬</span>
-      </p>
-      <p>
-        <i class="fas fa-chart-bar"></i>
-        <span>查看 <a href="https://tyctw.github.io/analysis/">全國會考統計資訊</a> 掌握第一手資料</span>
-      </p>
-
+      <p><i class="fas fa-sync-alt icon"></i>此邀請碼每小時自動更新一次。</p>
+      <p><i class="fas fa-clock icon"></i>請在邀請碼有效期內使用落點分析系統。</p>
+      <p><i class="fas fa-chart-line icon"></i> <a href="https://ctttw.github.io/">返回分析平台</a> 。</p>
+      <p><i class="fas fa-chart-bar icon"></i>查看 <a href="https://tyctw.github.io/analysis/">全國會考統計資料</a> 。</p>
     </div>
   </div>
 
-  <button id="darkModeToggle" class="dark-mode-toggle">
-    <i class="fas fa-moon"></i>
-  </button>
+  <div class="floating-buttons">
+    <button id="darkModeToggle" class="floating-button">
+      <i class="fas fa-moon"></i>
+    </button>
+    <button id="helpButton" class="floating-button">
+      <i class="fas fa-question"></i>
+    </button>
+  </div>
+
+  <div class="copyright">
+    2025 CTTW會考落點分析邀請碼. All rights reserved.
+  </div>
+
+  <div class="toast" id="toast">已成功複製邀請碼！</div>
 
   <div id="qrModal" class="modal">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <h2>邀請碼 QR 碼</h2>
-      <div id="qrCode"></div>
+      <h2 style="text-align: center; margin-bottom: 1.5rem;">邀請碼 QR 碼</h2>
+      <div style="text-align: center;">
+        <div id="qrCode"></div>
+      </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">
-    <i class="fas fa-check-circle"></i>
-    已成功複製邀請碼！
+  <div id="helpModal" class="modal">
+    <div class="modal-content">
+      <span class="close help-close">&times;</span>
+      <h2 style="text-align: center; margin-bottom: 1.5rem;">使用說明</h2>
+      <div style="line-height: 1.7;">
+        <p>1. 此頁面顯示中投區會考落點分析邀請碼，每小時自動更新。</p>
+        <p>2. 點擊「複製」按鈕將邀請碼複製到剪貼簿。</p>
+        <p>3. 點擊「顯示QR碼」生成邀請碼的QR碼。</p>
+        <p>4. 點擊「分享」啟動原生分享功能（若瀏覽器支援）。</p>
+        <p>5. 點擊「更新」可立即從後端獲取最新邀請碼。</p>
+        <p>6. 進度條顯示距離邀請碼更新的倒數進度。</p>
+        <p>7. 使用右下角主題切換按鈕切換深色模式。</p>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="darkMode.js"></script>
-  <script src="particles.js"></script>
-  <script src="invitationCode.js"></script>
   <script>
-    // Initialize everything when the window loads
-    window.addEventListener('load', function() {
-      setTimeout(function() {
-        document.querySelector('.loading').style.display = 'none';
-      }, 1000);
-      
-      initDarkMode();
-      initParticles();
-      updateInvitationCode();
-      setInterval(updateTimer, 1000);
-    });
+    // 從後端 Google Apps Script 讀取邀請碼，並加入載入動畫效果
+    function updateInvitationCode() {
+      const codeEl = document.getElementById('invitationCode');
+      // 顯示 loading spinner
+      codeEl.innerHTML = '<div class="spinner"></div>';
+      const backendURL = 'https://script.google.com/macros/s/AKfycbxN1ZoY-HpmLsH26JNZ6LcKHO0JAhp5iQUMMnTXrD7x0ZU43gs7BNF-M9akkSStZ8ZD/exec';
+      fetch(backendURL)
+        .then(response => response.json())
+        .then(data => {
+          const code = data.invitationCode;
+          codeEl.textContent = code;
+          codeEl.classList.add('fade-in');
+          setTimeout(() => codeEl.classList.remove('fade-in'), 500);
+          document.getElementById('lastUpdate').textContent = "最後更新：" + new Date().toLocaleString();
+        })
+        .catch(error => {
+          console.error('Error fetching invitation code:', error);
+          codeEl.textContent = "無法載入邀請碼";
+        });
+    }
 
-    // Update timer display
+    // 更新倒數計時與進度條
     function updateTimer() {
       const now = new Date();
       const nextHour = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0);
@@ -101,27 +752,59 @@
       
       const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-    
+
       const timerElement = document.getElementById('timer');
       timerElement.innerHTML = `<i class="fas fa-hourglass-half"></i> 更新倒數：${minutes}分${seconds}秒`;
-    
+
+      const hourDuration = 3600000;
+      let progress = ((hourDuration - timeLeft) / hourDuration) * 100;
+      progress = Math.min(100, Math.max(0, progress));
+      document.getElementById('progressBar').style.width = progress + '%';
+
       if (timeLeft <= 0) {
         updateInvitationCode();
       }
     }
 
-    // Show toast message
-    function showToast() {
+    // 複製邀請碼
+    function copyInvitationCode() {
+      const invitationCode = document.getElementById('invitationCode').textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(invitationCode).then(() => {
+          showToast("已成功複製邀請碼！");
+        }).catch(err => {
+          console.error('無法複製到剪貼簿:', err);
+          alert('複製失敗，請手動複製邀請碼。');
+        });
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = invitationCode;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showToast("已成功複製邀請碼！");
+        } catch (err) {
+          console.error('無法複製到剪貼簿:', err);
+          alert('複製失敗，請手動複製邀請碼。');
+        }
+        document.body.removeChild(textArea);
+      }
+    }
+
+    // 顯示 Toast 提示
+    function showToast(message = "已成功複製邀請碼！") {
       const toast = document.getElementById('toast');
+      toast.textContent = message;
       toast.style.opacity = '1';
       toast.style.transform = 'translate(-50%, 0)';
       setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%, 20px)';
+        toast.style.transform = 'translate(-50%, -20px)';
       }, 2000);
     }
 
-    // QR Code modal functionality
+    // 顯示 QR 碼模態框
     function showQRCode() {
       const modal = document.getElementById("qrModal");
       const span = document.getElementsByClassName("close")[0];
@@ -138,41 +821,92 @@
       
       modal.style.display = "block";
       
-      span.onclick = function() {
-        modal.style.display = "none";
-      }
+      span.onclick = function() { modal.style.display = "none"; };
       
       window.onclick = function(event) {
-        if (event.target == modal) {
-          modal.style.display = "none";
-        }
+        if (event.target == modal) { modal.style.display = "none"; }
       }
     }
 
-    // Security measures
-    document.addEventListener('copy', function(e) {
-      if (e.target.id !== 'invitationCode') {
-        e.preventDefault();
-        return false;
+    // 分享邀請碼
+    function shareInvitationCode() {
+      const invitationCode = document.getElementById('invitationCode').textContent;
+      if (navigator.share) {
+        navigator.share({
+          title: '中投區會考落點分析邀請碼',
+          text: `我的中投區會考落點分析邀請碼是：${invitationCode}`,
+          url: 'https://tyctw.github.io/'
+        }).then(() => {
+          console.log('邀請碼分享成功');
+        }).catch((error) => {
+          console.log('邀請碼分享失敗', error);
+        });
+      } else {
+        alert(`請複製以下文字進行分享：\n\n我的中投區會考落點分析邀請碼是：${invitationCode}\n\n網站: https://tyctw.github.io/`);
       }
-    });
+    }
 
+    // 手動更新邀請碼
+    function manualRefresh() {
+      updateInvitationCode();
+      showToast("邀請碼已更新！");
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      localStorage.setItem('darkMode', isDarkMode);
+      updateDarkModeIcon();
+      
+      if (document.getElementById("qrModal").style.display === "block") {
+        showQRCode();
+      }
+    }
+
+    function updateDarkModeIcon() {
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const isDarkMode = document.body.classList.contains('dark-mode');
+      darkModeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
+
+    function initDarkMode() {
+      const darkModeToggle = document.getElementById('darkModeToggle');
+      const savedDarkMode = localStorage.getItem('darkMode');
+      if (savedDarkMode === 'true') { document.body.classList.add('dark-mode'); }
+      updateDarkModeIcon();
+      darkModeToggle.addEventListener('click', toggleDarkMode);
+    }
+
+    // 初始化「使用說明」模態框
+    function initHelp() {
+      const helpButton = document.getElementById('helpButton');
+      const helpModal = document.getElementById('helpModal');
+      const helpClose = document.getElementsByClassName('help-close')[0];
+      helpButton.addEventListener('click', function() { helpModal.style.display = "block"; });
+      helpClose.addEventListener('click', function() { helpModal.style.display = "none"; });
+      window.addEventListener('click', function(e) {
+        if (e.target == helpModal) { helpModal.style.display = "none"; }
+      });
+    }
+
+    updateInvitationCode();
+    setInterval(updateTimer, 1000);
+    initDarkMode();
+    initHelp();
+
+    // 防止複製
+    document.addEventListener('copy', function(e) { e.preventDefault(); return false; });
+    // 防止截圖（僅適用於部分瀏覽器）
     document.addEventListener('keyup', function(e) {
       if (e.key == 'PrintScreen') {
         navigator.clipboard.writeText('');
         alert('截圖功能已被禁用');
       }
     });
-
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    });
-
-    document.onselectstart = function(e) {
-      if (e.target.id !== 'invitationCode') {
-        return false;
-      }
-    };
+    // 防止右鍵點擊
+    document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+    // 防止拖曳選擇文字
+    document.onselectstart = function() { return false; };
   </script>
 </body>
 </html>
