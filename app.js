@@ -83,13 +83,11 @@ function closeDisclaimer() {
   modal.style.display = 'none';
 }
 
-// Get the <span> element that closes the modal
-var span = document.getElementsByClassName('close')[0];
-
-// When the user clicks on <span> (x), close the modal
-span.onclick = function() {
-  closeDisclaimer();
-}
+document.querySelectorAll('.modal .close').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    this.closest('.modal').style.display = 'none';
+  });
+});
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
@@ -196,7 +194,7 @@ async function logUserActivity(action, details = {}) {
     };
 
     // Send to Google Apps Script endpoint
-    const response = await fetch('https://script.google.com/macros/s/AKfycbyLBiTYsptsuaTwUeb6SUphC_6SnPXBTgn9PulXMk9jS16IdkPqkqGWwLaeD28SrODoUw/exec', {
+    const response = await fetch('https://script.google.com/macros/s/AKfycbx5FRSSJwv5NQQDYS14p9xupj3iQj-TPS3vexSFLUESNdkuS9d1d5Ro4b-Wy7IMmYXidw/exec', {
       method: 'POST',
       body: JSON.stringify(data)
     });
@@ -447,6 +445,261 @@ function exportAsJSON() {
   const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   triggerDownload(url, '中投區會考落點分析結果.json');
+  closeExportModal();
+}
+
+// 新增列印功能
+function printResults() {
+  if (!window.latestAnalysisData) {
+    alert("請先進行分析後再列印！");
+    return;
+  }
+  
+  // 記錄使用者列印行為
+  logUserActivity('print_results', {
+    data: window.latestAnalysisData
+  });
+  
+  // 創建一個新的打印窗口
+  const printWindow = window.open('', '_blank');
+  const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
+  
+  // 獲取使用者輸入的成績
+  const scores = {
+    chinese: document.getElementById('chinese').value || '-',
+    english: document.getElementById('english').value || '-',
+    math: document.getElementById('math').value || '-',
+    science: document.getElementById('science').value || '-',
+    social: document.getElementById('social').value || '-',
+    composition: document.getElementById('composition').value || '-'
+  };
+  
+  // 獲取當前日期時間
+  const now = new Date();
+  const dateTime = now.toLocaleString('zh-TW', { 
+    year: 'numeric', month: '2-digit', day: '2-digit', 
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+  });
+  
+  // 創建打印內容
+  let printContent = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>中投區會考落點分析結果</title>
+    <style>
+      body {
+        font-family: 'Arial', '微軟正黑體', sans-serif;
+        line-height: 1.6;
+        color: #333;
+        padding: 20px;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #4376f7;
+      }
+      .title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #e74eff;
+        margin: 10px 0;
+      }
+      .subtitle {
+        font-size: 14px;
+        color: #666;
+      }
+      .watermark {
+        text-align: center;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        font-size: 12px;
+        color: #666;
+      }
+      .summary {
+        display: flex;
+        justify-content: space-around;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+      .summary-card {
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 10px;
+        text-align: center;
+        flex: 1;
+        min-width: 120px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+      .summary-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #00976a;
+      }
+      .summary-label {
+        font-size: 14px;
+        color: #666;
+      }
+      .scores-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+      }
+      .scores-table th, .scores-table td {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+      }
+      .scores-table th {
+        background-color: #f2f2f2;
+      }
+      .schools-section {
+        margin-top: 30px;
+      }
+      .school-type {
+        margin-top: 20px;
+        font-size: 18px;
+        color: #4376f7;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+      }
+      .school-list {
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .school-item {
+        padding: 8px 0;
+        border-bottom: 1px dashed #eee;
+      }
+      .no-schools {
+        text-align: center;
+        padding: 20px;
+        background: #f9f9f9;
+        border-radius: 5px;
+        color: #666;
+        font-style: italic;
+      }
+      .footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 12px;
+        color: #999;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .no-print {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="title">中投區會考落點分析結果</div>
+      <div class="subtitle">分析時間: ${dateTime}</div>
+    </div>
+    
+    <div class="watermark">
+      本分析結果由 CTTW 中投區會考落點分析系統生成，僅供參考。
+      <br>官方網站: https://ctttw.github.io/
+    </div>
+    
+    <div class="summary">
+      <div class="summary-card">
+        <div class="summary-value">${totalPoints}</div>
+        <div class="summary-label">總積分</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-value">${totalCredits}</div>
+        <div class="summary-label">總積點</div>
+      </div>
+    </div>
+    
+    <h3>考生成績</h3>
+    <table class="scores-table">
+      <tr>
+        <th>國文</th>
+        <th>英文</th>
+        <th>數學</th>
+        <th>自然</th>
+        <th>社會</th>
+        <th>作文</th>
+      </tr>
+      <tr>
+        <td>${scores.chinese}</td>
+        <td>${scores.english}</td>
+        <td>${scores.math}</td>
+        <td>${scores.science}</td>
+        <td>${scores.social}</td>
+        <td>${scores.composition}</td>
+      </tr>
+    </table>
+    
+    <div class="schools-section">
+      <h3>可能錄取的學校</h3>
+  `;
+  
+  if (eligibleSchools && eligibleSchools.length > 0) {
+    let groupedSchools = {};
+    eligibleSchools.forEach(school => {
+      if (!groupedSchools[school.type]) {
+        groupedSchools[school.type] = [];
+      }
+      groupedSchools[school.type].push(school.name);
+    });
+    
+    Object.entries(groupedSchools).forEach(([type, schools]) => {
+      printContent += `
+        <div class="school-type">${type}</div>
+        <ul class="school-list">
+      `;
+      
+      schools.forEach(schoolName => {
+        printContent += `<li class="school-item">• ${schoolName}</li>`;
+      });
+      
+      printContent += `</ul>`;
+    });
+  } else {
+    printContent += `
+      <div class="no-schools">
+        根據您的成績，暫時沒有符合條件的學校。
+      </div>
+    `;
+  }
+  
+  printContent += `
+    </div>
+    
+    <div class="footer">
+      注意：本分析結果僅供參考，實際錄取情況可能受多種因素影響。
+      <br>建議您諮詢學校輔導老師或升學顧問的專業意見，並關注各校的官方網站和招生簡章。
+      <br>© ${new Date().getFullYear()} CTTW 中投區會考落點分析系統
+    </div>
+    
+    <div class="no-print">
+      <button onclick="window.print()" style="padding: 10px 20px; background: #4376f7; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">列印此頁</button>
+      <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; margin-left: 10px;">關閉視窗</button>
+    </div>
+  </body>
+  </html>
+  `;
+  
+  printWindow.document.open();
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  
   closeExportModal();
 }
 

@@ -4,6 +4,10 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <meta name="google-adsense-account" content="ca-pub-3350304014189563">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
       <meta name="description" content="中投區會考落點分析，幫助使用者分析會考成績，提供學校落點參考。">
       <meta name="keywords" content="中投區, 會考, 落點分析, 教育, 學校,臺中一中,臺中女中,興大附中,文華高中,臺中二中,惠文高中,東山高中,長億高中,私立明道高中,私立明德高中,臺中高工,臺中家商,興大附農">
       <meta name="author" content="中投區會考落點">
@@ -273,7 +277,7 @@
         }
     
         .fullscreen-menu a {
-          color: #fff;
+          color: #000; 
           text-decoration: none;
           font-size: 1.2em;
           margin: 15px 0;
@@ -298,7 +302,7 @@
           top: 20px;
           right: 20px; 
           font-size: 1.8em;
-          color: #fff;
+          color: #000; 
           cursor: pointer;
           transition: color 0.3s ease, transform 0.3s ease;
         }
@@ -1105,6 +1109,22 @@
     background-color: #2980b9;
     transform: translateY(-2px);
   }
+        /* 列印按鈕樣式 */
+  .print-button {
+    background-color: var(--accent-color);
+    margin-top: 15px;
+    width: 100%;
+  }
+  
+  .print-button:hover {
+    background-color: #007755;
+  }
+  
+  @media print {
+    .container, .header, .fullscreen-menu, #exportModal, .dark-mode-toggle {
+      display: none !important;
+    }
+  }
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
           .container {
@@ -1284,22 +1304,7 @@
           box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
         }
         
-        /* 深色模式下的使用說明樣式 */
-        body.dark-mode #instructions {
-          background: linear-gradient(135deg, #2c2c2c, #1e1e1e);
-          border-left: 5px solid var(--accent-color);
-        }
-        
-        body.dark-mode .instruction-item {
-          background: #1e1e1e;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
-          border-left: 4px solid var(--secondary-color);
-        }
-        /* Insert the following CSS rule just before the closing </style> tag to improve visibility in light mode */
-        body:not(.dark-mode) .fullscreen-menu {
-          background: rgba(0, 0, 0, 0.8) !important;
-          border-left: 1px solid rgba(0, 0, 0, 0.3) !important;
-        }
+  
       </style>
 </head>
 <body>
@@ -1322,7 +1327,7 @@
     </div>
     <a href="https://sites.google.com/view/ctttw" target="_blank"><i class="fas fa-school"></i> 回到主網頁</a>
     <a href="https://ctttw.github.io/report_form" target="_blank"><i class="fas fa-exclamation-triangle"></i> 系統異常回報</a>
-    <a href="https://ctttw.github.io/Navigation/" target="_blank"><i class="fa-solid fa-circle-info"></i></i> 更多資訊</a>
+    <a href="https://ctttw.github.io/Navigation/" target="_blank"><i class="fa-solid fa-circle-info"></i> 更多資訊</a>
   </div>
   <div class="container">
     <h1><i class="fas fa-chart-line icon"></i>中投區會考落點分析系統</h1>
@@ -1526,6 +1531,7 @@
     <button class="export-format-button" onclick="exportAsTXT()">純文字 (.txt)</button>
     <button class="export-format-button" onclick="exportAsCSV()">CSV (.csv)</button>
     <button class="export-format-button" onclick="exportAsJSON()">JSON (.json)</button>
+    <button class="export-format-button print-button" onclick="printResults()"><i class="fas fa-print icon"></i> 列印結果</button>
   </div>
 </div>
 
