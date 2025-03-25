@@ -26,17 +26,58 @@ function toggleVocationalGroup() {
   }
 }
 
+function selectIdentity(identity) {
+  const cards = document.querySelectorAll('.identity-card');
+  cards.forEach(card => {
+    card.classList.remove('selected');
+  });
+  
+  document.getElementById(`identity-${identity}`).classList.add('selected');
+  document.getElementById('selectedIdentity').value = identity;
+  
+  // 記錄用戶選擇的身分
+  logUserActivity('select_identity', { identity });
+  
+  // 滑動到分析表單
+  document.getElementById('analysisForm').scrollIntoView({ behavior: 'smooth' });
+  
+  // 顯示選擇後的提示
+  const identityNames = {
+    'student': '學生',
+    'parent': '家長',
+    'teacher': '老師'
+  };
+  
+  const confirmationElement = document.getElementById('identityConfirmation');
+  confirmationElement.textContent = `您選擇的身分是: ${identityNames[identity]}`;
+  confirmationElement.style.display = 'block';
+  
+  // 添加淡入動畫
+  setTimeout(() => {
+    confirmationElement.classList.add('show');
+  }, 100);
+}
+
 function toggleInstructions() {
-  var instructions = document.getElementById('instructions');
-  if (instructions.style.display === 'none') {
-    instructions.style.display = 'block';
-    instructions.style.animation = 'fadeIn 0.5s ease-out';
-  } else {
-    instructions.style.animation = 'fadeOut 0.5s ease-out';
-    setTimeout(() => {
-      instructions.style.display = 'none';
-    }, 500);
-  }
+  var instructionsModal = document.getElementById('instructionsModal');
+  var modalContent = instructionsModal.querySelector('.modal-content');
+  instructionsModal.style.display = 'block';
+  
+  setTimeout(() => {
+    instructionsModal.classList.add('show');
+    modalContent.classList.add('show-content');
+  }, 10);
+}
+
+function closeInstructions() {
+  var modal = document.getElementById('instructionsModal');
+  var modalContent = modal.querySelector('.modal-content');
+  modalContent.classList.remove('show-content');
+  modal.classList.remove('show');
+  
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 400);
 }
 
 let isDragging = false;
@@ -48,6 +89,12 @@ function showDisclaimer() {
   var modalContent = modal.querySelector('.modal-content');
   modal.style.display = 'block';
   
+  // Add slight delay before adding show class for better animation
+  setTimeout(() => {
+    modal.classList.add('show');
+    modalContent.classList.add('show-content');
+  }, 10);
+  
   modalContent.addEventListener('mousedown', startDragging);
   document.addEventListener('mousemove', drag);
   document.addEventListener('mouseup', stopDragging);
@@ -55,6 +102,18 @@ function showDisclaimer() {
   modalContent.addEventListener('touchstart', startDragging);
   document.addEventListener('touchmove', drag);
   document.addEventListener('touchend', stopDragging);
+}
+
+function closeDisclaimer() {
+  var modal = document.getElementById('disclaimerModal');
+  var modalContent = modal.querySelector('.modal-content');
+  modalContent.classList.remove('show-content');
+  modal.classList.remove('show');
+  
+  // Add delay to match animation duration before hiding
+  setTimeout(() => {
+    modal.style.display = 'none';
+  }, 400);
 }
 
 function startDragging(e) {
@@ -78,11 +137,6 @@ function stopDragging() {
   document.querySelector('.modal-content').style.cursor = 'grab';
 }
 
-function closeDisclaimer() {
-  var modal = document.getElementById('disclaimerModal');
-  modal.style.display = 'none';
-}
-
 document.querySelectorAll('.modal .close').forEach(function(btn) {
   btn.addEventListener('click', function() {
     this.closest('.modal').style.display = 'none';
@@ -98,6 +152,10 @@ window.onclick = function(event) {
   var exportModal = document.getElementById('exportModal');
   if (event.target == exportModal) {
     closeExportModal();
+  }
+  var instructionsModal = document.getElementById('instructionsModal');
+  if (event.target == instructionsModal) {
+    closeInstructions();
   }
 }
 
@@ -116,12 +174,26 @@ function showLoading() {
   loadingOverlay.className = 'loading-overlay';
   loadingOverlay.innerHTML = `
     <div class="loading-spinner">
-      <div class="spinner"></div>
-      <div class="loading-text">分析中，請稍候...</div>
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
+      <div class="spinner-container">
+        <div class="spinner-ring"></div>
+        <div class="spinner-inner">
+          <div class="spinner-circle"></div>
+          <div class="spinner-icon"><i class="fas fa-chart-line"></i></div>
+        </div>
       </div>
-      <div class="loading-status">準備中...</div>
+      <div class="loading-text">分析中，請稍候...</div>
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill"></div>
+        </div>
+        <div class="loading-status">準備中...</div>
+      </div>
+      <div class="loading-steps">
+        <div class="step active"><i class="fas fa-cog"></i><span>初始化</span></div>
+        <div class="step"><i class="fas fa-database"></i><span>資料收集</span></div>
+        <div class="step"><i class="fas fa-calculator"></i><span>計算積分</span></div>
+        <div class="step"><i class="fas fa-check-circle"></i><span>完成</span></div>
+      </div>
     </div>
   `;
   document.body.appendChild(loadingOverlay);
@@ -143,24 +215,55 @@ function showLoading() {
 function animateAnalysisProgress() {
   const progressFill = document.querySelector('.progress-fill');
   const loadingStatus = document.querySelector('.loading-status');
-  const statuses = ['準備中...', '收集學校資料...', '分析成績...', '計算積分...', '產生結果報告...', '完成!'];
+  const loadingSteps = document.querySelectorAll('.loading-steps .step');
+  
+  const statuses = [
+    '準備分析資料...',
+    '收集學校資訊...',
+    '比對成績條件...',
+    '計算會考積分...',
+    '整理結果報表...',
+    '完成！'
+  ];
+  
   let currentStep = 0;
+  const totalSteps = statuses.length;
   
   const updateProgress = () => {
-    if (currentStep >= statuses.length) return;
+    if (currentStep >= totalSteps) return;
     
-    const progress = (currentStep + 1) / statuses.length;
+    const progress = (currentStep + 1) / totalSteps;
     progressFill.style.width = `${progress * 100}%`;
     loadingStatus.textContent = statuses[currentStep];
-    loadingStatus.style.animation = 'pulse 0.5s ease';
+    loadingStatus.classList.add('pulse');
+    
+    // Update step indicators
+    loadingSteps.forEach((step, index) => {
+      if (index < Math.floor(currentStep / (totalSteps / loadingSteps.length))) {
+        step.classList.add('active', 'completed');
+        step.classList.remove('current');
+      } else if (index === Math.floor(currentStep / (totalSteps / loadingSteps.length))) {
+        step.classList.add('active', 'current');
+        step.classList.remove('completed');
+      } else {
+        step.classList.remove('active', 'current', 'completed');
+      }
+    });
     
     setTimeout(() => {
-      loadingStatus.style.animation = '';
+      loadingStatus.classList.remove('pulse');
       currentStep++;
-      if (currentStep < statuses.length) {
-        setTimeout(updateProgress, currentStep === statuses.length - 1 ? 300 : 700);
+      if (currentStep < totalSteps) {
+        const delay = currentStep === totalSteps - 1 ? 300 : (500 + Math.random() * 500);
+        setTimeout(updateProgress, delay);
+      } else {
+        // Final step animation
+        loadingSteps.forEach((step) => {
+          step.classList.add('active', 'completed');
+          step.classList.remove('current');
+        });
       }
-    }, 500);
+    }, 300);
   };
   
   updateProgress();
@@ -214,6 +317,14 @@ async function analyzeScores() {
     const currentInvitationCode = generateInvitationCode();
     if (invitationCode !== currentInvitationCode) {
       alert('邀請碼錯誤或已過期，請確認最新的邀請碼。');
+      return;
+    }
+    
+    // 檢查身分是否選擇
+    const selectedIdentity = document.getElementById('selectedIdentity').value;
+    if (!selectedIdentity) {
+      alert('請先選擇您的身分（學生、家長或老師）');
+      document.getElementById('identitySelector').scrollIntoView({ behavior: 'smooth' });
       return;
     }
 
@@ -349,6 +460,50 @@ function displayResults(data) {
                       <tr><td>作文</td><td>${document.getElementById('composition').value || '-'}</td></tr>
                     </table>
                   </div>`;
+  
+  // 添加學校統計部分 - 改為圖卡式設計
+  if (eligibleSchools && eligibleSchools.length > 0) {
+    // 計算各類型學校的數量
+    let schoolsByType = {};
+    eligibleSchools.forEach(school => {
+      if (!schoolsByType[school.type]) {
+        schoolsByType[school.type] = 0;
+      }
+      schoolsByType[school.type]++;
+    });
+    
+    // 生成學校統計HTML - 使用卡片設計
+    resultsHTML += `<div class="school-stats">
+                      <h4><i class="fas fa-chart-pie"></i> 學校統計</h4>
+                      <div class="stats-total-card">
+                        <div class="stats-total-icon">
+                          <i class="fas fa-school"></i>
+                        </div>
+                        <div class="stats-total-value">${eligibleSchools.length}</div>
+                        <div class="stats-total-label">符合條件的學校總數</div>
+                      </div>
+                      <div class="stats-cards">`;
+    
+    // 添加各類型學校卡片
+    Object.entries(schoolsByType).forEach(([type, count]) => {
+      const percentage = Math.round((count / eligibleSchools.length) * 100);
+      const typeIcon = getSchoolTypeIcon(type);
+      const cardColor = getColorForSchoolType(type);
+      
+      resultsHTML += `<div class="stats-card" style="--stats-card-color: ${cardColor.split(',')[0].replace('linear-gradient(90deg', '').trim()}">
+                        <div class="stats-card-icon">
+                          <i class="${typeIcon}"></i>
+                        </div>
+                        <div class="stats-value">${count}</div>
+                        <div class="stats-label">${type}</div>
+                        <div class="stats-percentage">${percentage}%</div>
+                      </div>`;
+    });
+    
+    resultsHTML += `</div>
+                </div>`;
+  }
+  
   resultsHTML += `<div class="result-schools"><h3><i class="fas fa-list-ul icon"></i> 可能錄取的學校</h3>`;
   if (eligibleSchools && eligibleSchools.length > 0) {
     let groupedSchools = {};
@@ -370,6 +525,7 @@ function displayResults(data) {
   } else {
     resultsHTML += `<p class="no-schools"><i class="fas fa-exclamation-triangle icon"></i> 根據您的成績，暫時沒有符合條件的學校。</p>`;
   }
+  
   resultsHTML += `</div></div>`;
   const resultsElement = document.getElementById('results');
   resultsElement.innerHTML = resultsHTML;
@@ -384,12 +540,66 @@ function displayResults(data) {
   window.latestAnalysisData = data;
 }
 
-// 新增匯出格式選單相關函式
-function showExportModal() {
-  document.getElementById('exportModal').style.display = 'block';
+// 新增判斷學校類型的圖標函數
+function getSchoolTypeIcon(type) {
+  switch(type) {
+    case '普通科': return 'fas fa-book';
+    case '職業類科': return 'fas fa-tools';
+    case '綜合高中': return 'fas fa-school';
+    case '機械群': return 'fas fa-cogs';
+    case '電機與電子群': return 'fas fa-microchip';
+    case '商業與管理群': return 'fas fa-briefcase';
+    case '外語群': return 'fas fa-language';
+    case '設計群': return 'fas fa-paint-brush';
+    case '餐旅群': return 'fas fa-utensils';
+    case '家政群': return 'fas fa-home';
+    default: return 'fas fa-graduation-cap';
+  }
 }
+
+// 添加獲取類型顏色的函數 - 增加更多顏色變化
+function getColorForSchoolType(type) {
+  const colors = {
+    '普通科': 'linear-gradient(90deg, #4361ee, #3a0ca3)',
+    '職業類科': 'linear-gradient(90deg, #f72585, #7209b7)',
+    '綜合高中': 'linear-gradient(90deg, #4cc9f0, #4895ef)',
+    '機械群': 'linear-gradient(90deg, #3a86ff, #0077b6)',
+    '電機與電子群': 'linear-gradient(90deg, #00b4d8, #0096c7)',
+    '商業與管理群': 'linear-gradient(90deg, #ffd166, #ffaa00)',
+    '外語群': 'linear-gradient(90deg, #06d6a0, #1b9aaa)',
+    '設計群': 'linear-gradient(90deg, #ef476f, #d62246)',
+    '餐旅群': 'linear-gradient(90deg, #ff9e00, #ff6d00)',
+    '家政群': 'linear-gradient(90deg, #9d4edd, #7b2cbf)',
+    '食品群': 'linear-gradient(90deg, #2ec4b6, #20a4f3)',
+    '農業群': 'linear-gradient(90deg, #70e000, #38b000)',
+    '土木與建築群': 'linear-gradient(90deg, #fb8500, #ffb703)',
+    '化工群': 'linear-gradient(90deg, #ff477e, #ff5c8a)'
+  };
+  
+  return colors[type] || 'linear-gradient(90deg, #4cc9f0, #4361ee)';
+}
+
+// 新增匯出格式選菜單相關函式
+function showExportModal() {
+  var exportModal = document.getElementById('exportModal');
+  var modalContent = exportModal.querySelector('.modal-content');
+  exportModal.style.display = 'block';
+  
+  setTimeout(() => {
+    exportModal.classList.add('show');
+    modalContent.classList.add('show-content');
+  }, 10);
+}
+
 function closeExportModal() {
-  document.getElementById('exportModal').style.display = 'none';
+  var exportModal = document.getElementById('exportModal');
+  var modalContent = exportModal.querySelector('.modal-content');
+  modalContent.classList.remove('show-content');
+  exportModal.classList.remove('show');
+  
+  setTimeout(() => {
+    exportModal.style.display = 'none';
+  }, 400);
 }
 
 function exportAsTXT() {
@@ -422,7 +632,18 @@ function exportAsCSV() {
     return;
   }
   const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
-  let csvContent = "總積分,總積點\n" + totalPoints + "," + totalCredits + "\n\n";
+  // Add BOM for UTF-8 encoding to properly display Chinese characters
+  let csvContent = "\uFEFF" + "總積分,總積點\n" + totalPoints + "," + totalCredits + "\n\n";
+  
+  // 添加成績資料
+  csvContent += "科目,分數\n";
+  csvContent += `國文,${document.getElementById('chinese').value}\n`;
+  csvContent += `英文,${document.getElementById('english').value}\n`;
+  csvContent += `數學,${document.getElementById('math').value}\n`;
+  csvContent += `自然,${document.getElementById('science').value}\n`;
+  csvContent += `社會,${document.getElementById('social').value}\n`;
+  csvContent += `作文,${document.getElementById('composition').value}\n\n`;
+  
   csvContent += "學校類型,學校名稱\n";
   eligibleSchools.forEach(school => {
     // 將逗號轉成其他字元避免 CSV 分隔問題
@@ -441,7 +662,26 @@ function exportAsJSON() {
     alert("請先進行分析後再匯出！");
     return;
   }
-  const jsonStr = JSON.stringify(window.latestAnalysisData, null, 2);
+  
+  // 獲取成績數據並添加到分析結果
+  const scores = {
+    chinese: document.getElementById('chinese').value,
+    english: document.getElementById('english').value,
+    math: document.getElementById('math').value,
+    science: document.getElementById('science').value,
+    social: document.getElementById('social').value,
+    composition: document.getElementById('composition').value
+  };
+  
+  // 合併成績和分析結果
+  const exportData = {
+    ...window.latestAnalysisData,
+    scores,
+    exportTime: new Date().toISOString(),
+    source: "CTTW 中投區會考落點分析系統"
+  };
+  
+  const jsonStr = JSON.stringify(exportData, null, 2);
   const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   triggerDownload(url, '中投區會考落點分析結果.json');
@@ -593,6 +833,50 @@ function printResults() {
         border-top: 1px solid #eee;
         padding-top: 10px;
       }
+      .stats-section {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      .stats-title {
+        font-size: 18px;
+        color: #4376f7;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+      }
+      .stat-item {
+        background: white;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #e74eff;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: #666;
+      }
+      .page-break {
+        page-break-after: always;
+      }
+      .qr-code {
+        text-align: center;
+        margin: 20px 0;
+      }
+      .qr-code img {
+        max-width: 150px;
+        height: auto;
+      }
       @media print {
         body {
           -webkit-print-color-adjust: exact;
@@ -617,10 +901,12 @@ function printResults() {
     
     <div class="summary">
       <div class="summary-card">
+        <i class="fas fa-star icon"></i>
         <div class="summary-value">${totalPoints}</div>
         <div class="summary-label">總積分</div>
       </div>
       <div class="summary-card">
+        <i class="fas fa-award icon"></i>
         <div class="summary-value">${totalCredits}</div>
         <div class="summary-label">總積點</div>
       </div>
@@ -645,7 +931,47 @@ function printResults() {
         <td>${scores.composition}</td>
       </tr>
     </table>
+  `;
+  
+  // 添加學校統計信息
+  if (eligibleSchools && eligibleSchools.length > 0) {
+    let schoolsByType = {};
+    let totalSchoolCount = eligibleSchools.length;
     
+    // 計算各類型學校的數量
+    eligibleSchools.forEach(school => {
+      if (!schoolsByType[school.type]) {
+        schoolsByType[school.type] = 0;
+      }
+      schoolsByType[school.type]++;
+    });
+    
+    printContent += `
+      <div class="stats-section">
+        <div class="stats-title">學校統計</div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">${totalSchoolCount}</div>
+            <div class="stat-label">總學校數</div>
+          </div>
+    `;
+    
+    Object.entries(schoolsByType).forEach(([type, count]) => {
+      printContent += `
+        <div class="stat-item">
+          <div class="stat-value">${count}</div>
+          <div class="stat-label">${type}</div>
+        </div>
+      `;
+    });
+    
+    printContent += `
+        </div>
+      </div>
+    `;
+  }
+  
+  printContent += `
     <div class="schools-section">
       <h3>可能錄取的學校</h3>
   `;
@@ -669,7 +995,7 @@ function printResults() {
         printContent += `<li class="school-item">• ${schoolName}</li>`;
       });
       
-      printContent += `</ul>`;
+      printContent += `</ul></div>`;
     });
   } else {
     printContent += `
@@ -685,7 +1011,7 @@ function printResults() {
     <div class="footer">
       注意：本分析結果僅供參考，實際錄取情況可能受多種因素影響。
       <br>建議您諮詢學校輔導老師或升學顧問的專業意見，並關注各校的官方網站和招生簡章。
-      <br>© ${new Date().getFullYear()} CTTW 中投區會考落點分析系統
+      <br> CTTW 中投區會考落點分析系統
     </div>
     
     <div class="no-print">
@@ -728,6 +1054,22 @@ function toggleMenu() {
   var links = menu.getElementsByTagName('a');
   for (var i = 0; i < links.length; i++) {
     links[i].style.animationDelay = (i * 0.1) + 's';
+    links[i].style.animation = menu.classList.contains("show") ? 
+      'slideInRight 0.5s ease-out forwards' : 'none';
+  }
+  
+  // 添加菜單轉場特效
+  const menuIcon = document.querySelector('.menu-icon i');
+  if (menu.classList.contains("show")) {
+    menuIcon.classList.remove('fa-bars');
+    menuIcon.classList.add('fa-times');
+    // 記錄菜單打開行為
+    logUserActivity('open_menu');
+  } else {
+    menuIcon.classList.remove('fa-times');
+    menuIcon.classList.add('fa-bars');
+    // 記錄菜單關閉行為
+    logUserActivity('close_menu');
   }
 }
 
@@ -837,4 +1179,87 @@ document.body.onkeydown = function(e){
   } else if(keyCode && keyCode == 123){
     return false;
   }
+}
+
+// Add touch event handlers for mobile devices
+function setupMobileInteractions() {
+  // Fix for 300ms delay on touch devices
+  document.addEventListener('touchstart', function() {}, {passive: true});
+  
+  // Handle mobile navigation better
+  document.querySelectorAll('.fullscreen-menu a').forEach(link => {
+    link.addEventListener('touchstart', function() {
+      this.classList.add('active-touch');
+    });
+    link.addEventListener('touchend', function() {
+      this.classList.remove('active-touch');
+      setTimeout(() => toggleMenu(), 100);
+    });
+  });
+  
+  // Add scrolling for long modals on mobile
+  document.querySelectorAll('.modal-content').forEach(modal => {
+    modal.addEventListener('touchmove', function(e) {
+      e.stopPropagation();
+    }, {passive: true});
+  });
+}
+
+// Initialize mobile optimizations
+document.addEventListener('DOMContentLoaded', function() {
+  setupMobileInteractions();
+  
+  // Adjust UI based on screen size
+  const adjustForMobile = () => {
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Adjust for mobile viewport
+      document.querySelectorAll('.form-group select, .form-group input[type="text"]')
+        .forEach(el => el.setAttribute('data-size', 'mobile'));
+    }
+  };
+  
+  adjustForMobile();
+  window.addEventListener('resize', adjustForMobile);
+});
+
+function submitRating() {
+  const rating = document.querySelector('input[name="rating"]:checked');
+  const feedback = document.getElementById('feedbackText').value;
+  
+  if (!rating) {
+    alert('請選擇星級評分');
+    return;
+  }
+  
+  // 記錄用戶評分活動
+  logUserActivity('submit_rating', {
+    rating: rating.value,
+    feedback: feedback
+  });
+  
+  // 發送評分數據到伺服器
+  try {
+    fetch('https://script.google.com/macros/s/AKfycbx5FRSSJwv5NQQDYS14p9xupj3iQj-TPS3vexSFLUESNdkuS9d1d5Ro4b-Wy7IMmYXidw/exec', {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'rating',
+        rating: rating.value,
+        feedback: feedback,
+        timestamp: new Date().toISOString()
+      })
+    });
+  } catch (error) {
+    console.error('Error submitting rating:', error);
+  }
+  
+  // 顯示感謝信息
+  const ratingSection = document.querySelector('.rating-section');
+  ratingSection.innerHTML = `
+    <div class="rating-thanks">
+      <i class="fas fa-heart icon"></i>
+      <h3>感謝您的評分!</h3>
+      <p>您的反饋對我們非常寶貴，我們會繼續努力改進系統。</p>
+    </div>
+  `;
 }
