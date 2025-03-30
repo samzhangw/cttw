@@ -603,28 +603,99 @@ function closeExportModal() {
 }
 
 function exportAsTXT() {
-  const resultsElement = document.getElementById('results');
-  const resultsText = resultsElement.innerText;
-  const now = new Date();
-  const dateTime = now.toLocaleString('zh-TW', { 
-    year: 'numeric', month: '2-digit', day: '2-digit', 
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-  });
-  const watermark = 
-    "********************************\n" +
-    "*    https://ctttw.github.io/   *\n" +
-    "*  CTTW 中投區會考落點分析系統 *\n" +
-    "*       以下資料僅供參考       *\n" +
-    "*                              *\n" +
-    `*產生時間: ${dateTime}         *\n` +
-    "*                              *\n" +
-    "********************************\n\n";
-  const contentWithWatermark = watermark + resultsText;
-  const blob = new Blob([contentWithWatermark], { type: 'text/plain;charset=utf-8' });
+  if (!window.latestAnalysisData) {
+    alert("請先進行分析後再匯出！");
+    return;
+  }
+  const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
+  const { scores, filters, selectedIdentity } = getCurrentInputData();
+  const schoolStats = getSchoolStatistics(eligibleSchools);
+  const sortedSchools = getSortedSchoolList(eligibleSchools);
+  const timestamp = getFormattedTimestamp();
+  const reportDate = timestamp.split('_')[0];
+  const reportTime = timestamp.split('_')[1];
+
+  // Build the text content using template literals and careful spacing
+  let content = `
+############################################################
+#        CTTW 中投區會考落點分析系統 - 分析報告        #
+############################################################
+
+報 告 日 期 ： ${reportDate}
+報 告 時 間 ： ${reportTime}
+使 用 者 身 分： ${selectedIdentity}
+資 料 來 源 ： https://ctttw.github.io/
+
+==================== [ 分析摘要 ] ====================
+  總積分        ： ${totalPoints}
+  總積點        ： ${totalCredits}
+
+==================== [ 輸入成績 ] ====================
+  國文          ： ${scores.chinese}
+  英文          ： ${scores.english}
+  數學          ： ${scores.math}
+  自然          ： ${scores.science}
+  社會          ： ${scores.social}
+  作文          ： ${scores.composition}
+
+==================== [ 篩選條件 ] ====================
+  學校公私立    ： ${filters.schoolOwnership === 'all' ? '全部' : filters.schoolOwnership}
+  學校類型      ： ${filters.schoolType === 'all' ? '全部' : filters.schoolType}
+  職業群科      ： ${filters.vocationalGroup === 'all' || filters.vocationalGroup === 'N/A' ? '全部 / 不適用' : filters.vocationalGroup}
+
+================= [ 符合學校統計 (共 ${schoolStats.total} 筆) ] =================
+`;
+
+  if (schoolStats.total > 0) {
+    schoolStats.countsByType.forEach(([type, count]) => {
+        // Pad type name for alignment (adjust padding as needed)
+        content += `  ${type.padEnd(12, '　')}： ${count} 間\n`; // Using full-width space for padding
+    });
+  } else {
+    content += `  (無符合條件學校)\n`;
+  }
+
+content += `
+============= [ 符合條件學校列表 (共 ${schoolStats.total} 筆) ] ==============
+`;
+
+  if (schoolStats.total > 0) {
+    let currentType = '';
+    sortedSchools.forEach(school => {
+      if (school.type !== currentType) {
+        currentType = school.type;
+        content += `\n[ ${currentType} ]\n`; // Group by type
+      }
+      content += `  - ${school.name}\n`;
+    });
+  } else {
+    content += `\n  (無符合條件學校)\n`;
+  }
+
+  content += `
+==================== [ 注意事項 ] ====================
+* 本分析結果由 CTTW 系統產生，僅供參考，不保證錄取結果。
+* 實際錄取情況可能受超額比序、招生名額變動等多重因素影響。
+* 請務必查閱官方簡章或洽詢學校輔導老師獲取最準確資訊。
+
+############################################################
+#                         報告結束                         #
+############################################################
+`;
+
+  // Clean up extra leading/trailing whitespace
+  content = content.trim() + '\n'; // Ensure final newline
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  triggerDownload(url, '中投區會考落點分析結果.txt');
+  triggerDownload(url, `CTTW_落點分析報告_${timestamp}.txt`);
   closeExportModal();
+  logUserActivity('export_txt', { dataSummary: { points: totalPoints, credits: totalCredits, count: schoolStats.total } });
 }
+
+
+
+
 
 function exportAsCSV() {
   if (!window.latestAnalysisData) {
@@ -632,400 +703,344 @@ function exportAsCSV() {
     return;
   }
   const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
-  // Add BOM for UTF-8 encoding to properly display Chinese characters
-  let csvContent = "\uFEFF" + "總積分,總積點\n" + totalPoints + "," + totalCredits + "\n\n";
-  
-  // 添加成績資料
-  csvContent += "科目,分數\n";
-  csvContent += `國文,${document.getElementById('chinese').value}\n`;
-  csvContent += `英文,${document.getElementById('english').value}\n`;
-  csvContent += `數學,${document.getElementById('math').value}\n`;
-  csvContent += `自然,${document.getElementById('science').value}\n`;
-  csvContent += `社會,${document.getElementById('social').value}\n`;
-  csvContent += `作文,${document.getElementById('composition').value}\n\n`;
-  
-  csvContent += "學校類型,學校名稱\n";
-  eligibleSchools.forEach(school => {
-    // 將逗號轉成其他字元避免 CSV 分隔問題
-    const type = school.type.replace(/,/g, " ");
-    const name = school.name.replace(/,/g, " ");
-    csvContent += `${type},${name}\n`;
-  });
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+  const { scores, filters, selectedIdentity } = getCurrentInputData();
+  const schoolStats = getSchoolStatistics(eligibleSchools);
+  const sortedSchools = getSortedSchoolList(eligibleSchools);
+  const timestamp = getFormattedTimestamp();
+
+  let csvContent = "\uFEFF"; // BOM
+
+  // Section 1: Metadata
+  csvContent += `"報表資訊",\n`;
+  csvContent += `"標題",${quoteField("CTTW 中投區會考落點分析報告")}\n`;
+  csvContent += `"產生時間",${quoteField(timestamp)}\n`;
+  csvContent += `"使用者身分",${quoteField(selectedIdentity)}\n`;
+  csvContent += `"資料來源",${quoteField("https://ctttw.github.io/")}\n\n`;
+
+  // Section 2: Summary
+  csvContent += `"分析摘要",\n`;
+  csvContent += `"項目",數值\n`;
+  csvContent += `"總積分",${quoteField(totalPoints)}\n`;
+  csvContent += `"總積點",${quoteField(totalCredits)}\n\n`;
+
+  // Section 3: Input Scores
+  csvContent += `"輸入成績",\n`;
+  csvContent += `"科目",成績\n`;
+  csvContent += `"國文",${quoteField(scores.chinese)}\n`;
+  csvContent += `"英文",${quoteField(scores.english)}\n`;
+  csvContent += `"數學",${quoteField(scores.math)}\n`;
+  csvContent += `"自然",${quoteField(scores.science)}\n`;
+  csvContent += `"社會",${quoteField(scores.social)}\n`;
+  csvContent += `"作文",${quoteField(scores.composition)}\n\n`;
+
+  // Section 4: Filters
+  csvContent += `"篩選條件",\n`;
+  csvContent += `"條件",選項\n`;
+  csvContent += `"學校公私立",${quoteField(filters.schoolOwnership === 'all' ? '全部' : filters.schoolOwnership)}\n`;
+  csvContent += `"學校類型",${quoteField(filters.schoolType === 'all' ? '全部' : filters.schoolType)}\n`;
+  csvContent += `"職業群科",${quoteField(filters.vocationalGroup === 'all' || filters.vocationalGroup === 'N/A' ? '全部 / 不適用' : filters.vocationalGroup)}\n\n`;
+
+  // Section 5: School Statistics
+  csvContent += `"符合學校統計",\n`;
+  csvContent += `"學校類型",數量\n`;
+  if (schoolStats.total > 0) {
+    schoolStats.countsByType.forEach(([type, count]) => {
+      csvContent += `${quoteField(type)},${quoteField(count)}\n`;
+    });
+    csvContent += `"總計",${quoteField(schoolStats.total)}\n`;
+  } else {
+    csvContent += `"統計結果","無符合條件學校"\n`;
+  }
+  csvContent += "\n";
+
+  // Section 6: School List
+  csvContent += `"符合條件學校列表 (共 ${schoolStats.total} 筆)",\n`;
+  csvContent += `"學校類型",學校名稱\n`;
+  if (schoolStats.total > 0) {
+    sortedSchools.forEach(school => {
+      csvContent += `${quoteField(school.type)},${quoteField(school.name)}\n`;
+    });
+  } else {
+    csvContent += `"列表結果","無符合條件學校"\n`;
+  }
+  csvContent += "\n";
+
+  // Section 7: Disclaimer
+  csvContent += `"注意事項",\n`;
+  csvContent += `${quoteField("本分析結果僅供參考，實際錄取情況可能受多種因素影響。請務必查閱官方簡章或洽詢學校輔導老師獲取最準確資訊。")},\n`;
+  csvContent += "\n";
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  triggerDownload(url, '中投區會考落點分析結果.csv');
+  triggerDownload(url, `CTTW_落點分析報告_${timestamp}.csv`);
   closeExportModal();
+  logUserActivity('export_csv', { dataSummary: { points: totalPoints, credits: totalCredits, count: schoolStats.total } });
 }
+
+
+
 
 function exportAsJSON() {
   if (!window.latestAnalysisData) {
     alert("請先進行分析後再匯出！");
     return;
   }
-  
-  // 獲取成績數據並添加到分析結果
-  const scores = {
-    chinese: document.getElementById('chinese').value,
-    english: document.getElementById('english').value,
-    math: document.getElementById('math').value,
-    science: document.getElementById('science').value,
-    social: document.getElementById('social').value,
-    composition: document.getElementById('composition').value
-  };
-  
-  // 合併成績和分析結果
+  const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
+  const { scores, filters, selectedIdentity } = getCurrentInputData();
+  const schoolStats = getSchoolStatistics(eligibleSchools);
+  const sortedSchools = getSortedSchoolList(eligibleSchools);
+  const timestampISO = getFormattedTimestamp(true); // Use ISO format for JSON standard
+  const timestampReadable = getFormattedTimestamp(); // For display filename
+
+  // Map schools to exclude scores, ensuring sorting is preserved if desired (though order in JSON isn't guaranteed)
+  const schoolsToExport = sortedSchools.map(school => ({
+      name: school.name,
+      type: school.type
+  }));
+
+  // Structure the data logically
   const exportData = {
-    ...window.latestAnalysisData,
-    scores,
-    exportTime: new Date().toISOString(),
-    source: "CTTW 中投區會考落點分析系統"
+    reportMetadata: {
+      title: "CTTW 中投區會考落點分析報告",
+      source: "https://ctttw.github.io/",
+      reportTimestamp: timestampISO,
+      generatedBy: "CTTW Analysis System",
+      identity: selectedIdentity
+    },
+    analysisInputs: {
+      scores: scores,
+      filters: filters
+    },
+    analysisSummary: {
+      totalPoints: totalPoints,
+      totalCredits: totalCredits,
+      eligibleSchoolCount: schoolStats.total
+    },
+    analysisDetails: {
+       schoolStatisticsByType: Object.fromEntries(schoolStats.countsByType), // Convert sorted array back to object
+       eligibleSchools: schoolsToExport // Use the mapped array without scores
+    },
+    disclaimer: "本分析結果僅供參考，實際錄取情況可能受多種因素影響，請以官方公告為準。"
   };
-  
-  const jsonStr = JSON.stringify(exportData, null, 2);
+
+  const jsonStr = JSON.stringify(exportData, null, 2); // Pretty print
   const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-  triggerDownload(url, '中投區會考落點分析結果.json');
+  triggerDownload(url, `CTTW_落點分析報告_${timestampReadable}.json`);
   closeExportModal();
+  logUserActivity('export_json', { dataSummary: { points: totalPoints, credits: totalCredits, count: schoolStats.total } });
 }
 
-// 新增列印功能
+
+
+
+
 function printResults() {
   if (!window.latestAnalysisData) {
     alert("請先進行分析後再列印！");
     return;
   }
-  
-  // 記錄使用者列印行為
-  logUserActivity('print_results', {
-    data: window.latestAnalysisData
-  });
-  
-  // 創建一個新的打印窗口
-  const printWindow = window.open('', '_blank');
+
+  logUserActivity('print_results', { dataSummary: { points: window.latestAnalysisData.totalPoints, credits: window.latestAnalysisData.totalCredits, count: window.latestAnalysisData.eligibleSchools ? window.latestAnalysisData.eligibleSchools.length : 0 } });
+
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
   const { totalPoints, totalCredits, eligibleSchools } = window.latestAnalysisData;
-  
-  // 獲取使用者輸入的成績
-  const scores = {
-    chinese: document.getElementById('chinese').value || '-',
-    english: document.getElementById('english').value || '-',
-    math: document.getElementById('math').value || '-',
-    science: document.getElementById('science').value || '-',
-    social: document.getElementById('social').value || '-',
-    composition: document.getElementById('composition').value || '-'
-  };
-  
-  // 獲取當前日期時間
-  const now = new Date();
-  const dateTime = now.toLocaleString('zh-TW', { 
-    year: 'numeric', month: '2-digit', day: '2-digit', 
-    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-  });
-  
-  // 創建打印內容
+  const { scores, filters, selectedIdentity } = getCurrentInputData();
+  const schoolStats = getSchoolStatistics(eligibleSchools);
+  const sortedSchools = getSortedSchoolList(eligibleSchools);
+  const timestamp = getFormattedTimestamp();
+
+  // --- Highly Refined Print CSS (Keep the one from the previous answer) ---
+  const printCSS = `
+    /* --- General Setup --- */
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, 'Microsoft JhengHei', '微軟正黑體', sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #fff; font-size: 10pt; }
+    .print-container { width: 100%; margin: 0 auto; padding: 0; }
+    /* --- Typography & Links --- */
+    h1, h2, h3, h4 { margin: 1.2em 0 0.6em 0; font-weight: 600; color: #1a1a1a; page-break-after: avoid; }
+    h1 { font-size: 18pt; text-align: center; margin-bottom: 0.8em; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+    h2 { font-size: 14pt; border-bottom: 1.5px solid #555; padding-bottom: 4px; }
+    h3 { font-size: 12pt; border-bottom: 1px solid #ccc; padding-bottom: 3px; }
+    h4 { font-size: 11pt; color: #0056b3; font-weight: bold; margin: 1em 0 0.5em 0; }
+    p { margin: 0 0 0.8em 0; }
+    a { color: #007bff; text-decoration: none; }
+    a:visited { color: #0056b3; }
+    /* --- Header & Footer --- */
+    .header { text-align: center; margin-bottom: 20px; } /* Remove border here, h1 has it */
+    .subtitle { font-size: 9pt; color: #555; margin-top: -15px; margin-bottom: 20px; } /* Adjust spacing */
+    .footer { margin-top: 30px; text-align: center; font-size: 8pt; color: #777; border-top: 1px solid #ccc; padding-top: 10px; }
+    /* --- Info Box / Watermark --- */
+    .info-box { text-align: left; padding: 10px 15px; background-color: #f1f8ff; border: 1px solid #cbe6ff; border-radius: 4px; margin: 20px 0; font-size: 9pt; color: #334; page-break-inside: avoid; }
+    .info-box strong { color: #0056b3; }
+    /* --- Summary Section --- */
+    .summary { display: flex; justify-content: space-evenly; margin: 25px 0; flex-wrap: wrap; gap: 20px; page-break-inside: avoid; }
+    .summary-card { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 12px 18px; text-align: center; flex: 1; min-width: 140px; }
+    .summary-value { font-size: 20pt; font-weight: bold; color: #28a745; margin-bottom: 2px; line-height: 1.2; }
+    .summary-label { font-size: 9pt; color: #6c757d; text-transform: uppercase; }
+    /* --- Data Tables --- */
+    .data-table { width: 100%; border-collapse: collapse; margin: 15px 0 25px 0; font-size: 9.5pt; page-break-inside: avoid; }
+    .data-table th, .data-table td { padding: 8px 10px; border: 1px solid #ccc; text-align: left; vertical-align: middle; }
+    .data-table thead th { background-color: #e9ecef; font-weight: 600; text-align: center; color: #333; }
+    .data-table tbody tr:nth-child(odd) { background-color: #f8f9fa; }
+    .data-table td:first-child { font-weight: 500; color: #444; width: 20%; text-align: right; padding-right: 15px; } /* Adjust label width */
+    .data-table.center-cells td { text-align: center; }
+    .data-table.center-cells td:first-child { text-align: center; width: auto; } /* Override for score table labels */
+    .filter-table td:first-child { width: 25%; } /* Specific width for filter labels */
+    /* --- School Statistics --- */
+    .stats-section { background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px 20px; margin: 25px 0; page-break-inside: avoid; }
+    /* stats-title uses h3 */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 15px; }
+    .stat-item { background: white; border-radius: 4px; padding: 8px; text-align: center; border: 1px solid #ddd; }
+    .stat-value { font-size: 14pt; font-weight: bold; color: #007bff; display: block; margin-bottom: 2px; }
+    .stat-label { font-size: 8pt; color: #555; line-height: 1.2; }
+    /* --- School List Section --- */
+    .schools-section { margin-top: 25px; }
+    /* school-type-heading uses h4 */
+    .school-list { list-style-type: none; padding-left: 5px; margin: 5px 0 15px 0; font-size: 9.5pt; /* Removed columns: 2; often problematic */ }
+    .school-item { padding: 4px 0 4px 12px; position: relative; page-break-inside: avoid; border-bottom: 1px dotted #eee; } /* Add subtle border back */
+    .school-item:last-child { border-bottom: none; }
+    .school-item::before { content: '›'; position: absolute; left: 0; top: 3px; color: #007bff; font-weight: bold; font-size: 1.1em; }
+    /* No Schools Message */
+    .no-schools { text-align: center; padding: 20px; background: #fff8f8; border: 1px dashed #f5c6cb; border-radius: 4px; color: #721c24; font-style: italic; margin: 20px 0; font-size: 9.5pt; }
+    /* --- Print-Specific Adjustments --- */
+    @media print {
+      body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .no-print { display: none !important; }
+      .summary-card, .stats-section, .stat-item { box-shadow: none; }
+      a { text-decoration: underline; text-decoration-thickness: 0.5px; text-underline-offset: 2px; }
+       p, li { orphans: 3; widows: 3; }
+    }
+  `;
+
+  // --- Build Print HTML Content ---
   let printContent = `
   <!DOCTYPE html>
-  <html>
+  <html lang="zh-TW">
   <head>
-    <title>中投區會考落點分析結果</title>
-    <style>
-      body {
-        font-family: 'Arial', '微軟正黑體', sans-serif;
-        line-height: 1.6;
-        color: #333;
-        padding: 20px;
-        max-width: 800px;
-        margin: 0 auto;
-      }
-      .header {
-        text-align: center;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #4376f7;
-      }
-      .title {
-        font-size: 24px;
-        font-weight: bold;
-        color: #e74eff;
-        margin: 10px 0;
-      }
-      .subtitle {
-        font-size: 14px;
-        color: #666;
-      }
-      .watermark {
-        text-align: center;
-        padding: 10px;
-        background-color: #f9f9f9;
-        border-radius: 5px;
-        margin-bottom: 20px;
-        font-size: 12px;
-        color: #666;
-      }
-      .summary {
-        display: flex;
-        justify-content: space-around;
-        margin: 20px 0;
-        flex-wrap: wrap;
-      }
-      .summary-card {
-        background: #f9f9f9;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 10px;
-        text-align: center;
-        flex: 1;
-        min-width: 120px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      }
-      .summary-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #00976a;
-      }
-      .summary-label {
-        font-size: 14px;
-        color: #666;
-      }
-      .scores-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 20px 0;
-      }
-      .scores-table th, .scores-table td {
-        padding: 8px 12px;
-        border: 1px solid #ddd;
-        text-align: center;
-      }
-      .scores-table th {
-        background-color: #f2f2f2;
-      }
-      .schools-section {
-        margin-top: 30px;
-      }
-      .school-type {
-        margin-top: 20px;
-        font-size: 18px;
-        color: #4376f7;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 5px;
-      }
-      .school-list {
-        list-style-type: none;
-        padding-left: 0;
-      }
-      .school-item {
-        padding: 8px 0;
-        border-bottom: 1px dashed #eee;
-      }
-      .no-schools {
-        text-align: center;
-        padding: 20px;
-        background: #f9f9f9;
-        border-radius: 5px;
-        color: #666;
-        font-style: italic;
-      }
-      .footer {
-        margin-top: 30px;
-        text-align: center;
-        font-size: 12px;
-        color: #999;
-        border-top: 1px solid #eee;
-        padding-top: 10px;
-      }
-      .stats-section {
-        background: #f5f5f5;
-        border-radius: 8px;
-        padding: 15px;
-        margin: 20px 0;
-      }
-      .stats-title {
-        font-size: 18px;
-        color: #4376f7;
-        margin-bottom: 15px;
-        text-align: center;
-      }
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-      }
-      .stat-item {
-        background: white;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      }
-      .stat-value {
-        font-size: 20px;
-        font-weight: bold;
-        color: #e74eff;
-      }
-      .stat-label {
-        font-size: 12px;
-        color: #666;
-      }
-      .page-break {
-        page-break-after: always;
-      }
-      .qr-code {
-        text-align: center;
-        margin: 20px 0;
-      }
-      .qr-code img {
-        max-width: 150px;
-        height: auto;
-      }
-      @media print {
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        .no-print {
-          display: none;
-        }
-      }
-    </style>
+    <meta charset="UTF-8">
+    <title>中投區會考落點分析報告 - CTTW</title>
+    <style>${printCSS}</style>
   </head>
   <body>
-    <div class="header">
-      <div class="title">中投區會考落點分析結果</div>
-      <div class="subtitle">分析時間: ${dateTime}</div>
-    </div>
-    
-    <div class="watermark">
-      本分析結果由 CTTW 中投區會考落點分析系統生成，僅供參考。
-      <br>官方網站: https://ctttw.github.io/
-    </div>
-    
-    <div class="summary">
-      <div class="summary-card">
-        <i class="fas fa-star icon"></i>
-        <div class="summary-value">${totalPoints}</div>
-        <div class="summary-label">總積分</div>
+    <div class="print-container">
+      <div class="header">
+        <h1>中投區會考落點分析報告</h1>
+        <div class="subtitle">由 CTTW 系統產生 | 分析時間: ${timestamp} | 使用者: ${selectedIdentity}</div>
       </div>
-      <div class="summary-card">
-        <i class="fas fa-award icon"></i>
-        <div class="summary-value">${totalCredits}</div>
-        <div class="summary-label">總積點</div>
+
+      <div class="info-box">
+        <strong>重要提醒：</strong>本分析結果由 CTTW 中投區會考落點分析系統 (<a href="https://ctttw.github.io/" target="_blank">https://ctttw.github.io/</a>) 生成，<strong>僅供參考</strong>。
+        實際錄取情況可能受超額比序、招生名額變動等多重因素影響。請務必以<strong>官方公告</strong>及<strong>各校招生簡章</strong>為最終依據。建議諮詢學校輔導老師獲取專業意見。
       </div>
-    </div>
-    
-    <h3>考生成績</h3>
-    <table class="scores-table">
-      <tr>
-        <th>國文</th>
-        <th>英文</th>
-        <th>數學</th>
-        <th>自然</th>
-        <th>社會</th>
-        <th>作文</th>
-      </tr>
-      <tr>
-        <td>${scores.chinese}</td>
-        <td>${scores.english}</td>
-        <td>${scores.math}</td>
-        <td>${scores.science}</td>
-        <td>${scores.social}</td>
-        <td>${scores.composition}</td>
-      </tr>
-    </table>
-  `;
-  
-  // 添加學校統計信息
-  if (eligibleSchools && eligibleSchools.length > 0) {
-    let schoolsByType = {};
-    let totalSchoolCount = eligibleSchools.length;
-    
-    // 計算各類型學校的數量
-    eligibleSchools.forEach(school => {
-      if (!schoolsByType[school.type]) {
-        schoolsByType[school.type] = 0;
-      }
-      schoolsByType[school.type]++;
-    });
-    
+
+      <h2>分析摘要</h2>
+      <div class="summary">
+        <div class="summary-card">
+          <div class="summary-value">${totalPoints}</div>
+          <div class="summary-label">總積分</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-value">${totalCredits}</div>
+          <div class="summary-label">總積點</div>
+        </div>
+      </div>
+
+      <h2>輸入成績與條件</h2>
+      <table class="data-table center-cells">
+        <thead>
+          <tr><th>國文</th><th>英文</th><th>數學</th><th>自然</th><th>社會</th><th>作文</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>${scores.chinese}</td><td>${scores.english}</td><td>${scores.math}</td>
+            <td>${scores.science}</td><td>${scores.social}</td><td>${scores.composition}</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="data-table filter-table">
+         <tbody>
+            <tr><td>學校公私立</td><td>${filters.schoolOwnership === 'all' ? '全部' : filters.schoolOwnership}</td></tr>
+            <tr><td>學校類型</td><td>${filters.schoolType === 'all' ? '全部' : filters.schoolType}</td></tr>
+            <tr><td>職業群科</td><td>${filters.vocationalGroup === 'all' || filters.vocationalGroup === 'N/A' ? '全部 / 不適用' : filters.vocationalGroup}</td></tr>
+         </tbody>
+      </table>`;
+
+  // Add School Statistics if available
+  if (schoolStats.total > 0) {
     printContent += `
       <div class="stats-section">
-        <div class="stats-title">學校統計</div>
+        <h3>符合學校統計 (共 ${schoolStats.total} 筆資料)</h3>
         <div class="stats-grid">
           <div class="stat-item">
-            <div class="stat-value">${totalSchoolCount}</div>
-            <div class="stat-label">總學校數</div>
+            <span class="stat-value">${schoolStats.total}</span>
+            <span class="stat-label">總計</span>
           </div>
     `;
-    
-    Object.entries(schoolsByType).forEach(([type, count]) => {
+    schoolStats.countsByType.forEach(([type, count]) => {
       printContent += `
         <div class="stat-item">
-          <div class="stat-value">${count}</div>
-          <div class="stat-label">${type}</div>
-        </div>
-      `;
+          <span class="stat-value">${count}</span>
+          <span class="stat-label">${type}</span>
+        </div>`;
     });
-    
     printContent += `
         </div>
-      </div>
-    `;
+      </div>`;
   }
-  
-  printContent += `
-    <div class="schools-section">
-      <h3>可能錄取的學校</h3>
-  `;
-  
-  if (eligibleSchools && eligibleSchools.length > 0) {
-    let groupedSchools = {};
-    eligibleSchools.forEach(school => {
-      if (!groupedSchools[school.type]) {
-        groupedSchools[school.type] = [];
-      }
-      groupedSchools[school.type].push(school.name);
+
+  // Add School List
+  printContent += `<div class="schools-section"><h2>可能錄取的學校列表</h2>`;
+  if (schoolStats.total > 0) {
+    let currentType = '';
+    sortedSchools.forEach(school => {
+        // Insert type heading when type changes
+        if (school.type !== currentType) {
+            if (currentType !== '') { // Close previous list if not the first type
+                printContent += `</ul>`;
+            }
+            currentType = school.type;
+            // Find count for this type
+            const typeCount = schoolStats.countsByType.find(([t]) => t === currentType)?.[1] || 0;
+            printContent += `<h4>${currentType} (${typeCount} 間)</h4><ul class="school-list">`;
+        }
+        printContent += `<li class="school-item">${school.name}</li>`;
     });
-    
-    Object.entries(groupedSchools).forEach(([type, schools]) => {
-      printContent += `
-        <div class="school-type">${type}</div>
-        <ul class="school-list">
-      `;
-      
-      schools.forEach(schoolName => {
-        printContent += `<li class="school-item">• ${schoolName}</li>`;
-      });
-      
-      printContent += `</ul></div>`;
-    });
+    if (currentType !== '') { // Close the last list
+        printContent += `</ul>`;
+    }
   } else {
-    printContent += `
-      <div class="no-schools">
-        根據您的成績，暫時沒有符合條件的學校。
-      </div>
-    `;
+    printContent += `<div class="no-schools">根據您輸入的成績與篩選條件，目前系統中無符合的學校建議。</div>`;
   }
-  
+  printContent += `</div> <!-- End Schools Section -->`;
+
   printContent += `
-    </div>
-    
-    <div class="footer">
-      注意：本分析結果僅供參考，實際錄取情況可能受多種因素影響。
-      <br>建議您諮詢學校輔導老師或升學顧問的專業意見，並關注各校的官方網站和招生簡章。
-      <br> CTTW 中投區會考落點分析系統
-    </div>
-    
-    <div class="no-print">
-      <button onclick="window.print()" style="padding: 10px 20px; background: #4376f7; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">列印此頁</button>
-      <button onclick="window.close()" style="padding: 10px 20px; background: #666; color: white; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; margin-left: 10px;">關閉視窗</button>
-    </div>
+      <div class="footer">
+        --- 報告結束 ---
+        <br>CTTW 落點分析系統 | 祝您升學順利！
+      </div>
+
+      <div class="no-print" style="text-align:center; margin-top: 20px; padding: 15px; background: #eee; border-radius: 5px;">
+        <p style="margin:0 0 10px 0; font-weight: bold;">準備列印...</p>
+        <button onclick="window.print()" style="padding: 8px 18px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10pt;">立即列印</button>
+        <button onclick="window.close()" style="padding: 8px 18px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10pt; margin-left: 10px;">關閉視窗</button>
+      </div>
+    </div> <!-- End Print Container -->
   </body>
-  </html>
-  `;
-  
+  </html>`;
+
   printWindow.document.open();
   printWindow.document.write(printContent);
   printWindow.document.close();
-  
+
+  setTimeout(() => {
+    try {
+      printWindow.focus();
+      printWindow.print();
+    } catch (e) {
+      console.error("Error triggering print:", e);
+    }
+  }, 500);
+
   closeExportModal();
 }
 
@@ -1262,4 +1277,85 @@ function submitRating() {
       <p>您的反饋對我們非常寶貴，我們會繼續努力改進系統。</p>
     </div>
   `;
+}
+
+
+
+
+// Helper function to get current form inputs and scores
+function getCurrentInputData() {
+  const scores = {
+    chinese: document.getElementById('chinese').value || 'N/A',
+    english: document.getElementById('english').value || 'N/A',
+    math: document.getElementById('math').value || 'N/A',
+    science: document.getElementById('science').value || 'N/A',
+    social: document.getElementById('social').value || 'N/A',
+    composition: document.getElementById('composition').value || 'N/A'
+  };
+  const filters = {
+    schoolOwnership: document.getElementById('schoolOwnership').value,
+    schoolType: document.getElementById('schoolType').value,
+    vocationalGroup: document.getElementById('vocationalGroup').style.display === 'block' ? document.getElementById('vocationalGroup').value : 'N/A'
+  };
+  // Ensure identity value is fetched correctly
+  const identityElement = document.getElementById('selectedIdentity');
+  const selectedIdentity = identityElement ? (identityElement.value || '未選擇') : '未知'; // Added check for element existence
+
+  return { scores, filters, selectedIdentity };
+}
+
+// Helper function to safely quote CSV fields if necessary
+function quoteField(field) {
+  if (field === null || typeof field === 'undefined') {
+    return '""';
+  }
+  const stringField = String(field);
+  if (stringField.includes(',') || stringField.includes('"') || stringField.includes('\n')) {
+    const escapedField = stringField.replace(/"/g, '""');
+    return `"${escapedField}"`;
+  }
+  return stringField;
+}
+
+// Helper function to get current timestamp for filenames/reports
+function getFormattedTimestamp(iso = false) {
+    const now = new Date();
+    if (iso) {
+        return now.toISOString();
+    }
+    const dateTime = now.toLocaleString('zh-TW', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    // Replace slashes and spaces for filenames/consistency
+    return dateTime.replace(/\//g, '-').replace(' ', '_');
+}
+
+// Helper function to get sorted school stats
+function getSchoolStatistics(eligibleSchools) {
+    if (!eligibleSchools || eligibleSchools.length === 0) {
+        return { countsByType: {}, total: 0 };
+    }
+    let schoolsByType = {};
+    eligibleSchools.forEach(school => {
+      schoolsByType[school.type] = (schoolsByType[school.type] || 0) + 1;
+    });
+    // Return sorted stats and total
+    return {
+        countsByType: Object.entries(schoolsByType).sort(([typeA], [typeB]) => typeA.localeCompare(typeB, 'zh-Hant')),
+        total: eligibleSchools.length
+    };
+}
+
+// Helper function to get sorted school list
+function getSortedSchoolList(eligibleSchools) {
+    if (!eligibleSchools || eligibleSchools.length === 0) {
+        return [];
+    }
+    // Create a copy before sorting to avoid modifying the original data
+    return [...eligibleSchools].sort((a, b) => {
+        const typeCompare = a.type.localeCompare(b.type, 'zh-Hant');
+        if (typeCompare !== 0) return typeCompare;
+        return a.name.localeCompare(b.name, 'zh-Hant');
+    });
 }
